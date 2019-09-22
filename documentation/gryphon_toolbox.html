@@ -1,0 +1,403 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>gryphon_toolbox &mdash; Gryphon v0.9.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Gryphon v0.9.0 documentation" href="index.html" />
+    <link rel="next" title="ESDIRK" href="ESDIRK.html" />
+    <link rel="prev" title="gryphon_base" href="gryphon_base.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="ESDIRK.html" title="ESDIRK"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="gryphon_base.html" title="gryphon_base"
+             accesskey="P">previous</a> |</li>
+        <li><a href="gryphon.html">Gryphon v0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="gryphon-toolbox">
+<h1>gryphon_toolbox<a class="headerlink" href="#gryphon-toolbox" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="gryphon_toolbox">
+<em class="property">class </em><tt class="descname">gryphon_toolbox</tt><a class="headerlink" href="#gryphon_toolbox" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gryphon_toolbox.__init__">
+<tt class="descclassname">gryphon_toolbox.</tt><tt class="descname">__init__</tt><big>(</big><em>T</em>, <em>u</em>, <em>f</em>, <em>bcs=</em><span class="optional">[</span><span class="optional">]</span>, <em>tdf=</em><span class="optional">[</span><span class="optional">]</span>, <em>tdfBC=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#gryphon_toolbox.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>The constructor initializes the following class variables</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">dtmax</span> <span class="o">=</span> <span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">T</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mf">10.0</span>  <span class="c"># Max time step</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">dtmin</span> <span class="o">=</span> <span class="mf">1e-14</span>                    <span class="c"># Min time step</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">nAcc</span> <span class="o">=</span> <span class="mi">0</span>                         <span class="c"># Number of accepted steps</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">nRej</span> <span class="o">=</span> <span class="mi">0</span>                         <span class="c"># Number of rejected steps</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">accepted_steps</span> <span class="o">=</span> <span class="p">[]</span>              <span class="c"># Accepted steps</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">rejected_steps</span> <span class="o">=</span> <span class="p">[[],[]]</span>         <span class="c"># Rejected steps</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">Feval</span> <span class="o">=</span> <span class="mi">0</span>                        <span class="c"># Number of function assemblies</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">Jeval</span> <span class="o">=</span> <span class="mi">0</span>                        <span class="c"># Number of Jacobian assemblies</span>
+
+<span class="c"># Variables for storing previously accepted / rejected time steps</span>
+<span class="c"># with corresponding estimated local error. This is used in the</span>
+<span class="c"># Gustafsson step size selector.</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">le_acc</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c"># Rejected local error</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">le_rej</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c"># Rejected time step</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">dt_acc</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c"># Accepted local error</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">dt_rej</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c"># Accepted time step</span>
+
+<span class="bp">self</span><span class="o">.</span><span class="n">pfactor</span> <span class="o">=</span> <span class="mf">0.8</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">stepRejected</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">consecutive_rejects</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+</div>
+<p>It is also responsible for creating and populating
+the <tt class="docutils literal"><span class="pre">Parameter</span></tt>-object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Create parameter object</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="s">&quot;gryphon&quot;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;verbose&quot;</span><span class="p">,</span><span class="bp">False</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;drawplot&quot;</span><span class="p">,</span><span class="bp">False</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">plotcomponents</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">u</span><span class="o">.</span><span class="n">value_size</span><span class="p">())</span>
+
+<span class="c"># Parameter set &quot;output&quot; nested under &quot;gryphon&quot;</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameters</span><span class="p">(</span><span class="s">&quot;output&quot;</span><span class="p">))</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;output&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;plot&quot;</span><span class="p">,</span><span class="bp">False</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;output&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;path&quot;</span><span class="p">,</span><span class="s">&quot;outputData&quot;</span><span class="p">)</span>
+
+<span class="c"># Parameter set &quot;timestepping&quot; nested under &quot;gryphon&quot;</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameters</span><span class="p">(</span><span class="s">&quot;timestepping&quot;</span><span class="p">))</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;dt&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;adaptive&quot;</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;pessimistic_factor&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">pfactor</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;absolute_tolerance&quot;</span><span class="p">,</span><span class="mf">1e-7</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;relative_tolerance&quot;</span><span class="p">,</span><span class="mf">1e-6</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;convergence_criterion&quot;</span><span class="p">,</span><span class="s">&quot;absolute&quot;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;dtmax&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dtmax</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;dtmin&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dtmin</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;output&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;statistics&quot;</span><span class="p">,</span><span class="bp">False</span><span class="p">)</span>
+
+<span class="c"># Set range for parameter-object</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_range</span><span class="p">(</span><span class="s">&quot;convergence_criterion&quot;</span><span class="p">,[</span><span class="s">&quot;relative&quot;</span><span class="p">,</span><span class="s">&quot;absolute&quot;</span><span class="p">])</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_range</span><span class="p">(</span><span class="s">&quot;pessimistic_factor&quot;</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="c"># Select default step size selector and populate choices.</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&quot;stepsizeselector&quot;</span><span class="p">,</span><span class="s">&quot;standard&quot;</span><span class="p">)</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_range</span><span class="p">(</span><span class="s">&quot;stepsizeselector&quot;</span><span class="p">,[</span><span class="s">&quot;gustafsson&quot;</span><span class="p">,</span><span class="s">&quot;standard&quot;</span><span class="p">])</span>
+<span class="c"># Dictionary which contains the step size selectors.</span>
+<span class="c"># Needed since the FEniCS parameters system is unable to store function handles</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">stepsizeselector</span> <span class="o">=</span> <span class="p">{</span>
+                         <span class="s">&quot;gustafsson&quot;</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dtGustafsson</span><span class="p">,</span>
+                         <span class="s">&quot;standard&quot;</span>   <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dtStandard</span>
+                        <span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="updateParameters">
+<tt class="descname">updateParameters</tt><big>(</big><big>)</big><a class="headerlink" href="#updateParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method updates the class variables with values from the
+parameter dictionary. The method should be called just before
+starting the time stepping process.</p>
+</dd></dl>
+
+<div class="section" id="output-handling">
+<h2>Output handling<a class="headerlink" href="#output-handling" title="Permalink to this headline">¶</a></h2>
+<dl class="method">
+<dt id="generateOutput">
+<tt class="descname">generateOutput</tt><big>(</big><em>terminateReason</em><big>)</big><a class="headerlink" href="#generateOutput" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method will be called right before a gryphon-program terminates.
+The method will then check which output parameters are set
+and will then call appropriate methods for generating the desired
+output. Relevant methods are <a class="reference internal" href="#savePlot" title="savePlot"><tt class="xref py py-func docutils literal"><span class="pre">savePlot()</span></tt></a>
+and <a class="reference internal" href="#saveStatistics" title="saveStatistics"><tt class="xref py py-func docutils literal"><span class="pre">saveStatistics()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="savePlot">
+<tt class="descname">savePlot</tt><big>(</big><big>)</big><a class="headerlink" href="#savePlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>The purpose of this method is to save a plot of the
+selected/rejected steps made by Gryphon. The plot will only
+be saved if the parameter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;output&#39;</span><span class="p">][</span><span class="s">&#39;plot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>The file will be named <tt class="docutils literal"><span class="pre">steps.eps</span></tt> and will be placed in the
+path defined by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;output&#39;</span><span class="p">][</span><span class="s">&#39;path&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The header of the plot will include which step size selector was
+used. Note that this feature requires that the package &#8216;matplotlib&#8217;
+is installed. If you are running Gryphon in an environment without
+graphics, matplotlib must use the &#8216;agg&#8217;-backend in order for the
+plot to be saved successfully.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="saveStatistics">
+<tt class="descname">saveStatistics</tt><big>(</big><em>terminateReason</em><big>)</big><a class="headerlink" href="#saveStatistics" title="Permalink to this definition">¶</a></dt>
+<dd><p>The purpose of this method is to generate useful output to the user
+before the program terminates. It will only execute if the
+parameter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;output&#39;</span><span class="p">][</span><span class="s">&#39;statistics&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>Both a LaTeX-table and an ASCII-table will be generated and written
+to the path defined by the parameter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;output&#39;</span><span class="p">][</span><span class="s">&#39;path&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Note that the LaTeX-table will only be written if the program
+terminated successfully (<tt class="docutils literal"><span class="pre">terminateReason</span> <span class="pre">=</span> <span class="pre">&quot;success&quot;</span></tt>). The
+ASCII-table will always be written. The two files will be named</p>
+<ul class="simple">
+<li>statistics.tex</li>
+<li>statistics.ascii</li>
+</ul>
+<p>The tables will contain the following information:</p>
+<ul class="simple">
+<li>CPU/Wall time</li>
+<li>No. accepted/rejected steps</li>
+<li>Convergence criterion</li>
+<li>Absolute/relative tolerance</li>
+<li>Pessimistic factor</li>
+<li>Step size selector</li>
+<li>Function/Jacobian calls (if nonlinear problem)</li>
+<li>t_min / t_max</li>
+<li>t_mean / t_variance</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="figureHandling">
+<tt class="descname">figureHandling</tt><big>(</big><em>self</em>, <em>Init=False</em>, <em>Update=False</em><big>)</big><a class="headerlink" href="#figureHandling" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is responsible for both plotting and saving of the
+numerical solutions in each time step. It is first called with the
+keyword argument <tt class="docutils literal"><span class="pre">Init=True</span></tt> to initialize the plot windows and
+<tt class="docutils literal"><span class="pre">pvd</span></tt>-files. Then, for each time step, the method is called with
+the keyword argument <tt class="docutils literal"><span class="pre">Update=True</span></tt>. The plots are initialized with the
+keyword argument <tt class="docutils literal"><span class="pre">rescale=True</span></tt> and will be saved in the path
+defined by the parameter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;output&#39;</span><span class="p">][</span><span class="s">&#39;path&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="step-size-selectors">
+<h2>Step size selectors<a class="headerlink" href="#step-size-selectors" title="Permalink to this headline">¶</a></h2>
+<dl class="method">
+<dt id="dtGustafsson">
+<tt class="descname">dtGustafsson</tt><big>(</big><em>le</em>, <em>p</em>, <em>stepAccepted</em><big>)</big><a class="headerlink" href="#dtGustafsson" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd><ul class="first last simple">
+<li>le: Estimate of local error in current time step.</li>
+<li>p: Order of local error estimate.</li>
+<li>stepAccepted: Flag to indicate if the step was accepted.</li>
+</ul>
+</dd>
+</dl>
+<p>This method features the implementation of the step size
+selector developed by Kjell Gustafsson (<a class="footnote-reference" href="#f1" id="id1">[1]</a>, <a class="footnote-reference" href="#f2" id="id2">[2]</a>) for implicit
+Runge-Kutta methods. To use this step size selector in your program,
+update the parameter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;stepsizeselector&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;gustafsson&quot;</span>
+</pre></div>
+</div>
+<table class="docutils footnote" frame="void" id="f1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Control of Error and Convergence in ODE Solvers.
+PhD thesis, Lund Institute of Technology, 1992.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="f2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Control theoretic techniques for stepsize selection in
+implicit Runge-Kutta methods. ACM TOMS, 21(4):496-517, 1994.</td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dtStandard">
+<tt class="descname">dtStandard</tt><big>(</big><em>le</em>, <em>p</em>, <em>stepAccepted</em><big>)</big><a class="headerlink" href="#dtStandard" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd><ul class="first last simple">
+<li>le: Estimate of local error in current time step.</li>
+<li>p: Order of local error estimate.</li>
+<li>stepAccepted: Flag to indicate if the step was accepted.</li>
+</ul>
+</dd>
+</dl>
+<p>This method features a step size selector on the form</p>
+<div class="math">
+<p><img src="_images/math/473e17ef7ba7de8087ab1d1169b5a2ce0508b429.png" alt="\Delta t_{n+1} = \mathcal{P} \Delta t_n \left( \frac{le_n}{tol} \right)^{1/p}," /></p>
+</div><p>where <img class="math" src="_images/math/5cd9ddbcc4d4fb291d7fd610a760f6a6941b45a8.png" alt="\mathcal{P} \in [0,1]" style="vertical-align: -5px"/> is the pessimistic factor.
+The pessimistic factor can be changed by the parameter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;pessimistic_factor&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To use this step size selector in your program, update the parameter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;stepsizeselector&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;standard&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="verifyStepSize">
+<tt class="descname">verifyStepSize</tt><big>(</big><big>)</big><a class="headerlink" href="#verifyStepSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is designed to be a safety net for the step size
+selectors. It operates according to the following rules:</p>
+<ul>
+<li><p class="first">A new time step can not be greater than 1.5 times the old
+time step or the user specified limit</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;dtmax&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">A new time step can not be smaller than 0.1 times the old
+time step or the user specified limit</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;dtmin&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">If a time step overflows the integration domain, it is capped.</p>
+</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="acceptStep">
+<tt class="descname">acceptStep</tt><big>(</big><em>le</em>, <em>u</em><big>)</big><a class="headerlink" href="#acceptStep" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd><ul class="first last simple">
+<li>le: Estimate for the local error in current time step.</li>
+<li>u: Numerical solution in current time step.</li>
+</ul>
+</dd>
+</dl>
+<p>The purpose of this method is to check whether or not the current
+time step should be accepted or not. If</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;convergence_criterion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;relative&quot;</span>
+</pre></div>
+</div>
+<p>the step is accepted if</p>
+<div class="math">
+<p><img src="_images/math/e0662bfa71db67c092a9b1ecbba3c55524e29384.png" alt="le \leq \max(\text{relative tolerance} \cdot \| u \|_2, \text{absolute tolerance})." /></p>
+</div><p>If</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;convergence_criterion&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;absolute&quot;</span>
+</pre></div>
+</div>
+<p>the step is accepted if</p>
+<div class="math">
+<p><img src="_images/math/7b583e36587455ab03056df54b0c8297f07e3ac8.png" alt="le \leq \text{absolute tolerance}." /></p>
+</div><p>The relative/absolute tolerance is set via the parameters</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;absolute_tolerance&#39;</span><span class="p">]</span>
+<span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;relative_tolerance&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="gryphon.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">gryphon_toolbox</a><ul>
+<li><a class="reference internal" href="#output-handling">Output handling</a></li>
+<li><a class="reference internal" href="#step-size-selectors">Step size selectors</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="gryphon_base.html"
+                        title="previous chapter">gryphon_base</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ESDIRK.html"
+                        title="next chapter">ESDIRK</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/gryphon_toolbox.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="ESDIRK.html" title="ESDIRK"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="gryphon_base.html" title="gryphon_base"
+             >previous</a> |</li>
+        <li><a href="gryphon.html">Gryphon v0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Knut Erik Skare.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>

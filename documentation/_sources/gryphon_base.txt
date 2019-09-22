@@ -1,0 +1,91 @@
+gryphon_base
+============
+
+.. class:: gryphon_base
+
+.. method:: gryphon_base.__init__(self,T,u,f,bcs=[],tdf=[],tdfBC=[])
+
+  For information regarding the input, see the :func:`ESDIRK`
+  constructor.
+  
+  The constructor initializes the following member variables::
+  
+    self.u = u                                        # Initial condition
+    self.bcs = bcs                                    # Boundary conditions
+    self.f = f                                        # Right hand side
+    self.tdf = tdf                                    # Time dependent functions
+    self.tdfBC = tdfBC                                # Time dependent functions on the boundary
+    self.T = T                                        # Time domain
+    self.t = T[0]                                     # Current time
+    self.tstart = T[0]                                # Start of domain
+    self.tend = T[len(T)-1]                           # End of domain
+    self.dt = (self.tend-self.tstart)/1000.0          # Initial time step
+    self.Q = TestFunction(self.u.function_space())    # Trial Function to rhs
+    self.U = TrialFunction(self.u.function_space())   # Test Function to rhs
+    self.DT = Constant(self.dt)                       # Current step size, used in forms
+
+  The constructor also makes a call to :func:`verifyInput`, checks the
+  size and rank of the system to solve and sets the appropriate solver
+  (NewtonSolver for nonlinear systems and LUSolver for linear systems).
+
+.. method:: odeError(self,task,reason,remedy=False)
+
+    This method is designed to terminate the Gryphon program with an informative
+    error message for the user. First and foremost the error, and the reason for the error,
+    is printed, but if there exist a known remedy, it can be supplied via the keyword
+    argument ``remedy``.
+    
+.. method:: ensureFolder(self)
+
+    This method ensures that the output folder specified in the parameter ::
+    
+      solverObject.parameters['output']['path']
+    
+    exists. It does this via the built-in Python command ::
+    
+      os.makedirs
+      
+    which will create the folder if it does not exist. Note that this
+    folder will be created relative to the current working directory. To
+    print your current working directory, run the commands ::
+      
+      import os
+      os.getcwd()
+
+.. method:: printProgress(self,timeEstimate=False,rejectedStep=False)
+
+    This method is responsible for printing a progress bar to screen
+    if the parameter ::
+      
+      solverObject.parameters['verbose'] = True
+    
+    The two keyword arguments have the following interpretation:
+    
+    * timeEstimate: This argument is a function handle which is intented to return
+      an estimate for the remaining run-time of the program.
+    * rejectedStep: This argument must be set to ``True`` if the current step was rejected.
+    
+    Example output from this method looks like this::
+    
+      |==>..................| 8.9%          t=13.3082       Completion in ~ 0:00:53
+      |==>..................| 9.2%          t=13.8176       Completion in ~ 0:00:53
+      |==>..................| 9.6%          t=14.3518       Completion in ~ 0:00:53
+      |==>..................| 10.0%         t=14.9402       Completion in ~ 0:00:52
+      |==>..................| 10.0%         t=14.9402       Step rejected, dt=0.596632
+      |==>..................| 10.0%         t=14.9402       Step rejected, dt=0.483333
+      |==>..................| 10.3%         t=15.404        Completion in ~ 0:00:50
+
+    The time estimate will not be shown before the integration has proceeded
+    one percent since the estimate is based on the mean of previously
+    selected time steps.
+
+.. method:: verifyInput(self)
+
+  This method verifies that the user-given input is on the required
+  form. It returns an error in the following cases:
+    
+    * The time interval is non-positive
+    * The initial function is not a ``Function``-object
+    * The right hand side is not a ``Form``-object
+    * The boundary conditions are not either ``DirichletBC`` or
+      ``PeriodicBC``-objects.

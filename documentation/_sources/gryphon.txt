@@ -1,0 +1,75 @@
+.. Gryphon documentation master file, created by
+   sphinx-quickstart on Mon Apr 30 17:34:26 2012.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Gryphon documentation
+=====================
+The goal of Gryphon is to provide a set of intuitive tools for sovling
+time dependent partial differential equations. It is built upon the
+Python interface of the FEniCS framework. 
+
+This document consist of two parts.
+
+The first part provides a detailed presentation of the core components
+which make up Gryphon. It is not required to read this part in order
+to use the program. It will however be more useful if you are thinking
+of realizing a time integrator of your own, within Gryphon.
+
+The second part is a user manual which describe what parameters
+are available when working with Gryphon and what they do. There are
+also code examples for solving a single time dependent PDE as well
+as a system, in order to get you started on solving your own problems.
+
+It is assumed that the reader is familiar with the FEniCS framework.
+
+The reason behind the class hierarchy in Gryphon is as follows:
+
+  * :func:`gryphon_base`
+
+  This class is the highest superclass in the Gryphon hierarchy. Its
+  constructor is responsible for assigning a variety of class variables
+  to be used in both the gryphon_toolbox-class and the
+  time_integrator-class. It is also contains methods for input
+  verification, printing of program progress and error handling. In short,
+  it is designed to be a platform for which to build tools for doing time
+  integration, and for the time integrators themselves.
+
+  * :func:`gryphon_toolbox`
+  
+  This class is intended to contain tools found useful when implementing
+  a time integrator. This resonates well with the DRY principle in the
+  sense that we collect tools relevant for several time integrators in
+  one place which, makes for easy maintenance. Notable tools in this
+  class includes step size selectors and methods for output generation
+  (run time statistics, plot of accepted/rejected step sizes).
+  
+  * time_integrator
+  
+  This final class layer is intended to contain the realization of some
+  time integrator. Each class in this layer must contain the code for
+  augmenting a user specified UFL form with the code amounting to
+  applying the desired time integrator.
+    
+  The only implemented methods so far are :func:`ESDIRK` methods which allows
+  for both fixed and adaptive timestepping. To read in detail about
+  the classes and methods, click the links below.
+
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+   gryphon_base
+   gryphon_toolbox
+   ESDIRK
+   User_Guide
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+

@@ -1,0 +1,734 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>User Manual &mdash; Gryphon v0.9.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Gryphon v0.9.0 documentation" href="index.html" />
+    <link rel="prev" title="ESDIRK" href="ESDIRK.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="ESDIRK.html" title="ESDIRK"
+             accesskey="P">previous</a> |</li>
+        <li><a href="gryphon.html">Gryphon v0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="user-manual">
+<span id="usermanual"></span><h1>User Manual<a class="headerlink" href="#user-manual" title="Permalink to this headline">¶</a></h1>
+<p>This user manual assumes that the user is already familiar with the
+FEniCS framework. Gryphon is intended for use under FEniCS 1.0.0 using
+the Python API.</p>
+<div class="section" id="handling-explicit-time-dependency">
+<h2>Handling Explicit Time Dependency<a class="headerlink" href="#handling-explicit-time-dependency" title="Permalink to this headline">¶</a></h2>
+<p>In order for the Gryphon to recognize explicit time dependent
+expressions, the variable representing time <em>must</em> be named <tt class="docutils literal"><span class="pre">t</span></tt>.
+If we want to represent the function</p>
+<div class="math">
+<p><img src="_images/math/f4af039cf5cb44838cc4075e5b0051ddb6fd1861.png" alt="f(x,y,t) = x + y + t," /></p>
+</div><p>we can do it in two ways. The simplest way is to write</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">f</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="s">&quot;x[0] + x[1] + t&quot;</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or we could define a class</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">f</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">values</span><span class="p">,</span><span class="n">x</span><span class="p">):</span>
+    <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span>
+</pre></div>
+</div>
+<p>Note that the variable <tt class="docutils literal"><span class="pre">t</span></tt> must be assigned an initial value.</p>
+</div>
+<div class="section" id="constructing-a-gryphon-object">
+<h2>Constructing a Gryphon Object<a class="headerlink" href="#constructing-a-gryphon-object" title="Permalink to this headline">¶</a></h2>
+<p>In order to use Gryphon in the FEniCS framework, you first
+have to import a module. If we would like to use the an ESDIRK solver,
+we can import it as such</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">Gryphon</span> <span class="kn">import</span> <span class="n">ESDIRK</span>
+</pre></div>
+</div>
+<p>The constructor for the ESDIRK object have three required arguments and
+four optional keyword arguments. The header for the constructor is
+as follows</p>
+<div class="highlight-python"><pre>def __init__(T,u,f,g=[],bcs=[],tdf=[],tdfBC=[]):</pre>
+</div>
+<p>The arguments have the following interpretations:</p>
+<p><strong>T:</strong>
+This argument should be an array with two elements defining the start
+and end of the time domain you wish to integrate over.</p>
+<p><strong>u:</strong>
+This argument represent the initial condition used for the time
+integration. It should be represented as a <tt class="docutils literal"><span class="pre">Function</span></tt>-object defined
+on the spatial mesh for which to integrate.</p>
+<p><strong>f</strong> and <strong>g</strong>:
+The ESDIRK solver assumes that your problem is on the form</p>
+<div class="math">
+<p><img src="_images/math/a2f741951ac781c88f3c932504a0d5b4455f82dd.png" alt="u_t &amp;= f(\nabla^2 u, \nabla u, u, t) \\
+0   &amp;= g(\nabla^2 u, \nabla u, u, t)" /></p>
+</div><p>The arguments <tt class="docutils literal"><span class="pre">f</span></tt> and <tt class="docutils literal"><span class="pre">g</span></tt> should be a <tt class="docutils literal"><span class="pre">Form</span></tt> representing the
+weak form of the right hand side of your problem. If you are solving
+a system of PDEs, you can pass a list of <tt class="docutils literal"><span class="pre">Form</span></tt>-objects corresponding
+to each equation in the system. An example of this can be found at the
+end of this document where the Gray-Scott model is solved.</p>
+<p><strong>tdf:</strong>
+If the <tt class="docutils literal"><span class="pre">Form</span></tt> in <tt class="docutils literal"><span class="pre">f</span></tt> or <tt class="docutils literal"><span class="pre">g</span></tt> contains functions which are
+explicitly dependent on time, they must be sent to the ESDIRK-object
+via this argument. See the heat equation example for an illustration
+on how this argument is used.</p>
+<p><strong>bcs:</strong>
+This argument should be a list of <tt class="docutils literal"><span class="pre">DirichletBC</span></tt>-objects
+defining the Dirichlet boundary conditions of your problem.</p>
+<p><strong>tdfBC:</strong>
+If any of the boundary conditions specified in <tt class="docutils literal"><span class="pre">f</span></tt> or <tt class="docutils literal"><span class="pre">g</span></tt> are
+explicitly dependent on time, they must be sent to the ESDIRK-object
+via this argument. See the heat equation example for an illustration
+on how this argument is used.</p>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<p>The ESDIRK-library inherits the parameter system included in the FEniCS
+framework. This allows any user familiar with FEniCS to quickly get an
+overview of the available parameters for a ESDIRK-object by calling</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">info</span><span class="p">(</span><span class="n">ESDIRK_object</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>By default, this will return the following output</p>
+<div class="highlight-python"><pre>&lt;Parameter set "gryphon" containing 3 parameter(s) and 2 nested parameter set(s)&gt;
+
+  gryphon   |    type      value                                         range  access  change
+  --------------------------------------------------------------------------------------------
+  drawplot  |    bool      false                                 {true, false}       0       0
+  method    |  string  ESDIRK43a  [ESDIRK32a, ESDIRK32b, ESDIRK43a, ESDIRK43b]       0       0
+  verbose   |    bool      false                                 {true, false}       0       0
+
+  &lt;Parameter set "output" containing 3 parameter(s) and 0 nested parameter set(s)&gt;
+
+    output      |    type       value          range  access  change
+    ----------------------------------------------------------------
+    path        |  string  outputData             []       0       0
+    plot        |    bool       false  {true, false}       0       0
+    statistics  |    bool       false  {true, false}       0       0
+
+  &lt;Parameter set "timestepping" containing 10 parameter(s) and 0 nested parameter set(s)&gt;
+
+    timestepping              |    type     value                   range  access  change
+    -------------------------------------------------------------------------------------
+    absolute_tolerance        |  double     1e-07                      []       0       0
+    adaptive                  |    bool      true           {true, false}       0       0
+    convergence_criterion     |  string  absolute    [absolute, relative]       0       0
+    dt                        |  double     0.001                      []       0       0
+    dtmax                     |  double       0.1                      []       0       0
+    dtmin                     |  double     1e-14                      []       0       0
+    inconsistent_initialdata  |    bool     false           {true, false}       0       0
+    pessimistic_factor        |  double       0.8                  [0, 1]       0       0
+    relative_tolerance        |  double     1e-06                      []       0       0
+    stepsizeselector          |  string  standard  [gustafsson, standard]       0       0</pre>
+</div>
+<p>It should be noted that the parameter sets &#8220;output&#8221; and &#8220;timestepping&#8221;
+are nested under the parameter set &#8220;gryphon&#8221;. This means that if we
+for instance would like to turn off adaptive time stepping, turn on
+plotting and save statistics, we have to write the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">ESDIRK_object</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">][</span><span class="s">&quot;adaptive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="n">ESDIRK_object</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;drawplot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">ESDIRK_object</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;output&quot;</span><span class="p">][</span><span class="s">&quot;statistics&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>The various parameters have the following interpretations:</p>
+<div class="section" id="parameter-set-gryphon">
+<h3>Parameter set: gryphon<a class="headerlink" href="#parameter-set-gryphon" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="method">
+<h4>method<a class="headerlink" href="#method" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="docutils literal"><span class="pre">&quot;ESDIRK43a&quot;</span></tt>)</p>
+<p>This parameter defines which ESDIRK method the program should use when
+doing the timestepping. Available methods to choose from are
+ESDIRK43a, ESDIRK43b, ESDIRK32a, ESDIRK32b. For details on these
+methods, see the table below</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="21%" />
+<col width="12%" />
+<col width="30%" />
+<col width="37%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Name</th>
+<th class="head">Order</th>
+<th class="head">Implicit Stages</th>
+<th class="head">Local Extrapolation</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>ESDIRK4/3a</td>
+<td>4</td>
+<td>4</td>
+<td>Yes</td>
+</tr>
+<tr><td>ESDIRK4/3b</td>
+<td>3</td>
+<td>4</td>
+<td>No</td>
+</tr>
+<tr><td>ESDIRK3/2a</td>
+<td>3</td>
+<td>3</td>
+<td>Yes</td>
+</tr>
+<tr><td>ESDIRK3/2b</td>
+<td>2</td>
+<td>3</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="drawplot">
+<h4>drawplot<a class="headerlink" href="#drawplot" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="xref docutils literal"><span class="pre">False</span></tt>)</p>
+<p>If this parameter is set to <tt class="xref docutils literal"><span class="pre">True</span></tt>, the program will display a plot
+of the solution in each time step using the built in <tt class="docutils literal"><span class="pre">plot</span></tt>-function
+included in the FEniCS framework (Viper). Note that the plot
+is initialized with the keyword argument <tt class="docutils literal"><span class="pre">rescale=True</span></tt>.</p>
+</div>
+<div class="section" id="verbose">
+<h4>verbose<a class="headerlink" href="#verbose" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="xref docutils literal"><span class="pre">False</span></tt>)</p>
+<p>If this parameter is set to <tt class="xref docutils literal"><span class="pre">True</span></tt>, the program will output a
+progress bar showing the progress of the time stepping. Example output
+can be seen below.</p>
+<div class="highlight-python"><pre>|====&gt;............... | 27.2%  t=2.722  Completion in ~ 0:03:42
+|====&gt;............... | 27.3%  t=2.728  Completion in ~ 0:03:44
+|====&gt;............... | 27.3%  t=2.733  Completion in ~ 0:03:30
+|====&gt;............... | 27.4%  t=2.739  Completion in ~ 0:03:22
+|====&gt;............... | 27.4%  t=2.744  Completion in ~ 0:03:36
+|=====&gt;.............. | 27.5%  t=2.750  Completion in ~ 0:03:23
+|=====&gt;.............. | 27.6%  t=2.755  Completion in ~ 0:03:37</pre>
+</div>
+<p>The estimated run time of the program is calculated as</p>
+<div class="math">
+<p><img src="_images/math/db6b45c7d7d086ecf18c82bd0c1f3f01db5ca96e.png" alt="\text{Run time} \approx \frac{\text{Wall time in previous iteration}}{\text{Average of selected time steps}} \cdot (t_{end} - t_n)" /></p>
+</div><p>where <img class="math" src="_images/math/d3edf677b3a9d6d0123288209253a8231d81b0db.png" alt="t_{end}" style="vertical-align: -3px"/> is the end of the time domain and <img class="math" src="_images/math/2e9bb94664d3e2d8c57a28afbd35f239ab99ef27.png" alt="t_n" style="vertical-align: -3px"/> is
+the current time in time step <img class="math" src="_images/math/174fadd07fd54c9afe288e96558c92e0c1da733a.png" alt="n" style="vertical-align: 0px"/>. This is obviously a very rough
+estimate which for example will fail to give a meaningful estimate if
+the solution have a very rapid behavior.</p>
+</div>
+</div>
+<div class="section" id="parameter-set-output">
+<h3>Parameter set: output<a class="headerlink" href="#parameter-set-output" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="path">
+<h4>path<a class="headerlink" href="#path" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="docutils literal"><span class="pre">outputData</span></tt>)</p>
+<p>This parameter defines the path to a folder where the program may save
+output, relative to the current working directory. Usually, this will
+result in a folder <tt class="docutils literal"><span class="pre">outputData</span></tt> being created in the same folder as
+the script you are running.</p>
+</div>
+<div class="section" id="plot">
+<h4>plot<a class="headerlink" href="#plot" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="xref docutils literal"><span class="pre">False</span></tt>)</p>
+<p>If this parameter is set to <tt class="xref docutils literal"><span class="pre">True</span></tt>, the program will export a plot of
+the solution in each time step to VTK-format. If you are solving a
+system of PDEs, each component will be saved separately.
+The plots will be saved in the following folder:</p>
+<div class="highlight-python"><pre>$current_working_directory/savepath/plot/</pre>
+</div>
+</div>
+<div class="section" id="statistics">
+<h4>statistics<a class="headerlink" href="#statistics" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="xref docutils literal"><span class="pre">False</span></tt>)</p>
+<p>If this parameter is set to <tt class="xref docutils literal"><span class="pre">True</span></tt>, the program will output
+statistics to a <tt class="docutils literal"><span class="pre">.tex</span></tt>-file and an <tt class="docutils literal"><span class="pre">.ascii</span></tt>-file as well as saving a
+plot of the selected step sizes. Example output can be seen in the
+section <a class="reference internal" href="#sec-exampleoutput"><em>Example Output</em></a>. All the data will be saved to the
+path defined by the parameter <tt class="docutils literal"><span class="pre">path</span></tt>.</p>
+</div>
+</div>
+<div class="section" id="parameter-set-timestepping">
+<h3>Parameter set: timestepping<a class="headerlink" href="#parameter-set-timestepping" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="adaptive">
+<h4>adaptive<a class="headerlink" href="#adaptive" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="xref docutils literal"><span class="pre">True</span></tt>)</p>
+<p>This parameter indicates whether the program should use adaptive
+stepsize selection or not. If set to <tt class="xref docutils literal"><span class="pre">False</span></tt>, fixed time step
+integration will be used where the fixed time step is defined by the
+parameter <tt class="docutils literal"><span class="pre">dt</span></tt>.</p>
+</div>
+<div class="section" id="convergence-criterion">
+<h4>convergence_criterion<a class="headerlink" href="#convergence-criterion" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="docutils literal"><span class="pre">&quot;absolute&quot;</span></tt>)</p>
+<p>When deciding whether or not to accept a time step, the estimated local
+error can be subject to one of two user specified criteria; &#8220;absolute&#8221;
+or &#8220;relative&#8221;. If <tt class="docutils literal"><span class="pre">convergence_criterion</span> <span class="pre">=</span> <span class="pre">&quot;absolute&quot;</span></tt>, the step
+is accepted if</p>
+<div class="math">
+<p><img src="_images/math/86cebfa35c61e1b822864ab20fb86877e08f2b8a.png" alt="\| e_n \|_2 \leq \mathtt{absolute\_tolerance}." /></p>
+</div><p>If <tt class="docutils literal"><span class="pre">convergence_criterion</span> <span class="pre">=</span> <span class="pre">&quot;relative&quot;</span></tt> the step is accepted if</p>
+<div class="math">
+<p><img src="_images/math/6756f16324e68023cb9fdaf1284abb692ae27290.png" alt="\|e_n\|_2 \leq \max \lbrace \mathtt{relative\_tolerance}\cdot\|u_n\|_2, \mathtt{absolute\_tolerance} \rbrace." /></p>
+</div><p>In the above statements, <img class="math" src="_images/math/a4dd476bf6ff573944c35b19a762a0e3fd8b88ad.png" alt="e_n" style="vertical-align: -3px"/> is the estimate for the local error
+and <img class="math" src="_images/math/4a62a262f68e1adce9d45fadca13dcfd7cc99ce6.png" alt="u_n" style="vertical-align: -3px"/> is the numerical solution in time step <img class="math" src="_images/math/174fadd07fd54c9afe288e96558c92e0c1da733a.png" alt="n" style="vertical-align: 0px"/>.</p>
+</div>
+<div class="section" id="absolute-tolerance">
+<h4>absolute_tolerance<a class="headerlink" href="#absolute-tolerance" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="docutils literal"><span class="pre">1e-7</span></tt>)</p>
+<p>See <tt class="docutils literal"><span class="pre">convergence_criterion</span></tt> for more details.</p>
+</div>
+<div class="section" id="relative-tolerance">
+<h4>relative_tolerance<a class="headerlink" href="#relative-tolerance" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="docutils literal"><span class="pre">1e-6</span></tt>)</p>
+<p>See <tt class="docutils literal"><span class="pre">convergence_criterion</span></tt> for more details.</p>
+</div>
+<div class="section" id="dt">
+<h4>dt<a class="headerlink" href="#dt" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="docutils literal"><span class="pre">1e-3</span></tt>)</p>
+<p>This parameter defines the size of the first time step. If the parameter
+<tt class="docutils literal"><span class="pre">adaptive</span> <span class="pre">=</span> <span class="pre">False</span></tt>, this is the time step used by the program through
+the entire domain.</p>
+</div>
+<div class="section" id="dtmax">
+<h4>dtmax<a class="headerlink" href="#dtmax" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: one tenth of the width of the time domain)</p>
+<p>This parameter defines the greatest allowable time step which
+the stepsize selector is allowed to take.</p>
+</div>
+<div class="section" id="dtmin">
+<h4>dtmin<a class="headerlink" href="#dtmin" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="docutils literal"><span class="pre">1e-14</span></tt>)</p>
+<p>This parameter defines the smallest allowable time step which the
+program can use. The program will terminate if this boundary is reached.</p>
+</div>
+<div class="section" id="inconsistent-initialdata">
+<h4>inconsistent_initialdata<a class="headerlink" href="#inconsistent-initialdata" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="xref docutils literal"><span class="pre">False</span></tt>)</p>
+<p>If the initial data for solving a system of PDEs (which semidiscretize
+into a DAE system) is inconsistent, the program can attempt to take a
+very small time step in order to get consistent data. If successful,
+the program will continue with the initial time step specified by <tt class="docutils literal"><span class="pre">dt</span></tt>.</p>
+</div>
+<div class="section" id="pessimistic-factor">
+<h4>pessimistic_factor<a class="headerlink" href="#pessimistic-factor" title="Permalink to this headline">¶</a></h4>
+<p>(Default value: <tt class="docutils literal"><span class="pre">0.8</span></tt>)</p>
+<p>This parameter defines the pessimistic factor used in the adaptive
+stepsize selection. Allowable range for this parameter is <img class="math" src="_images/math/e861e10e1c19918756b9c8b7717684593c63aeb8.png" alt="[0,1]" style="vertical-align: -5px"/>.
+See <tt class="docutils literal"><span class="pre">stepsizeselector</span></tt> for more details.</p>
+</div>
+<div class="section" id="stepsizeselector">
+<h4>stepsizeselector<a class="headerlink" href="#stepsizeselector" title="Permalink to this headline">¶</a></h4>
+<p>(Default value <tt class="docutils literal"><span class="pre">standard</span></tt>)</p>
+<p>This parameter allows the user to select which step size selector
+to use. The available methods are listed in table below.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="8%" />
+<col width="92%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Algorithm</th>
+<th class="head">Expression</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td>gustafsson</td>
+<td><img class="math" src="_images/math/1c75c27db9bce96a6d11bd9be376fba560b54d06.png" alt="\Delta t_{n+1} = \mathcal{P}\frac{\Delta t_n^2}{\Delta t_{n-1}} \left(\frac{\cdot tol \cdot le_{n-1}}{le_n^2} \right)^{1/p}" style="vertical-align: -13px"/></td>
+</tr>
+<tr><td>standard</td>
+<td><img class="math" src="_images/math/6c5293372387dc5858e0f1c63907a100d1fafef7.png" alt="\Delta t_{n+1} = \mathcal{P}\Delta t_{n} \left(\frac{tol}{le_n} \right)^{1/p}" style="vertical-align: -13px"/></td>
+</tr>
+</tbody>
+</table>
+<p>The <tt class="docutils literal"><span class="pre">gustafsson</span></tt> stepsize selector is developed by Kjell Gustafsson.
+(<a class="footnote-reference" href="#f1" id="id1">[1]</a>, <a class="footnote-reference" href="#f2" id="id2">[2]</a>)</p>
+<blockquote>
+<table class="docutils footnote" frame="void" id="f1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Control of Error and Convergence in ODE Solvers.
+PhD thesis, Lund Institute of Technology, 1992.</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="f2" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[2]</a></td><td>Control theoretic techniques for stepsize selection in
+implicit Runge-Kutta methods. ACM TOMS, 21(4):496-517, 1994.</td></tr>
+</tbody>
+</table>
+</blockquote>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="example-output">
+<span id="sec-exampleoutput"></span><h1>Example Output<a class="headerlink" href="#example-output" title="Permalink to this headline">¶</a></h1>
+<p>If the parameter <tt class="docutils literal"><span class="pre">['output']['statistics']</span> <span class="pre">=</span> <span class="pre">True</span></tt> for an
+ESDIRK-object, the program will, if it terminated successfully,
+produce a LaTeX/ASCII-table with relevant run time statistics
+as well as a plot of the selected time steps. The following example
+statistics were generated by running the heat equation example
+found at the end of this document.</p>
+<p>The ASCII-table looks like this:</p>
+<div class="highlight-python"><pre>********************************************
+    ODE solver terminated successfully!
+********************************************
+Method used:                ESDIRK43a
+Domain:                     [0,1]
+CPU-time:                   11
+Walltime:                   0:00:13
+Step size selector:         standard
+Pessimistic factor:         0.8
+Convergence criterion:      absolute
+Absolute tolerance:         1e-07
+Relative tolerance:         1e-06
+Number of steps accepted:   193 (98.97%)
+Number of steps rejected:   2 (1.03%)
+Maximum step size selected: 0.0118945
+Minimum step size selected: 0.000177563
+Mean step size:             0.00517595
+Variance in step sizes:     1.40139e-05</pre>
+</div>
+<p>The LaTeX-table looks like this:</p>
+<img alt="_images/exampleTable.png" src="_images/exampleTable.png" />
+<p>The plot of the selected time steps looks like this:</p>
+<img alt="_images/exampleDT.png" src="_images/exampleDT.png" />
+</div>
+<div class="section" id="example-problems">
+<h1>Example Problems<a class="headerlink" href="#example-problems" title="Permalink to this headline">¶</a></h1>
+<p>This section will show some code examples for solving time dependent
+partial differential equations. It is assumed that the reader
+is familiar with the FEniCS framework as well as being able to derive
+the weak form of a PDEs. Hopefully you will be able to solve your
+own problems using Gryphon by copying and changing these examples.</p>
+<div class="section" id="the-heat-equation">
+<h2>The Heat Equation<a class="headerlink" href="#the-heat-equation" title="Permalink to this headline">¶</a></h2>
+<p>Consider the heat equation with a source term given as</p>
+<div class="math">
+<p><img src="_images/math/a7bd79a9f44f99eb298e9590c8d91602b09a6144.png" alt="\frac{\partial u}{\partial t} &amp;= D_u\nabla^2 u + 10\sin\left(\frac{\pi}{2}t\right)\exp\left[-\frac{(x-0.7)^2 + (y-0.5)^2}{0.01}\right], \hspace{5mm} u \in \Omega," /></p>
+</div><p>with diffusion coefficient <img class="math" src="_images/math/802cc35b2efde6a414342762bdaa81995a53cd59.png" alt="D_u = 0.1" style="vertical-align: -3px"/> and boundary/initial
+conditions given as</p>
+<div class="math">
+<p><img src="_images/math/0de893acf14372c4435ded9a0342b18a36116ae8.png" alt="u(0,y,t) = t, \hspace{5mm} u(1,y,t) = 0, \hspace{5mm} u(x,y,0) = 0," /></p>
+</div><p>on the spatial domain <img class="math" src="_images/math/cb32bb3e2c136f31d61d0c4148498ceeb0ed4c08.png" alt="\Omega = [0,1] \times [0,1]" style="vertical-align: -5px"/> and time
+domain <img class="math" src="_images/math/e70754c1efb07bd54438989e7e001bafb98b429a.png" alt="t\in[0,1]" style="vertical-align: -5px"/>.</p>
+<p>The FEniCS code for solving this problem using the ESDIRK module
+can be either be found below <a class="reference external" href="examplecode/HeatEquation.py">or downloaded here</a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">gryphon</span> <span class="kn">import</span> <span class="n">ESDIRK</span>
+<span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c"># Define spatial mesh, function space, trial/test functions</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">UnitSquare</span><span class="p">(</span><span class="mi">29</span><span class="p">,</span><span class="mi">29</span><span class="p">)</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span><span class="s">&quot;Lagrange&quot;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">u</span> <span class="o">=</span> <span class="n">TrialFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">TestFunction</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+<span class="c"># Define diffusion coefficient and source inside domain</span>
+<span class="n">D</span> <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">domainSource</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="s">&quot;10*sin(pi/2*t)*exp(-((x[0]-0.7)*(x[0]-0.7) + (x[1]-0.5)*(x[1]-0.5))/0.01)&quot;</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c"># Define right hand side of the problem</span>
+<span class="n">rhs</span> <span class="o">=</span> <span class="o">-</span><span class="n">D</span><span class="o">*</span><span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">*</span><span class="n">dx</span> <span class="o">+</span> <span class="n">domainSource</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">dx</span>
+
+<span class="c"># Definie initial condition</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+<span class="n">W</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">Constant</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+
+<span class="c"># Define left and right boundary</span>
+<span class="k">def</span> <span class="nf">boundaryLeft</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">on_boundary</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">DOLFIN_EPS</span>
+
+<span class="k">def</span> <span class="nf">boundaryRight</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">on_boundary</span><span class="p">):</span>
+  <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">DOLFIN_EPS</span>
+
+<span class="n">boundarySource</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">(</span><span class="s">&quot;t&quot;</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">bcLeft</span>  <span class="o">=</span> <span class="n">DirichletBC</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="n">boundarySource</span><span class="p">,</span><span class="n">boundaryLeft</span><span class="p">)</span>
+<span class="n">bcRight</span> <span class="o">=</span> <span class="n">DirichletBC</span><span class="p">(</span><span class="n">V</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="n">boundaryRight</span><span class="p">)</span>
+
+<span class="c"># Define the time domain</span>
+<span class="n">T</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c"># Create the ESDIRK object</span>
+<span class="n">obj</span> <span class="o">=</span> <span class="n">ESDIRK</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">W</span><span class="p">,</span><span class="n">rhs</span><span class="p">,</span><span class="n">bcs</span><span class="o">=</span><span class="p">[</span><span class="n">bcLeft</span><span class="p">,</span><span class="n">bcRight</span><span class="p">],</span><span class="n">tdfBC</span><span class="o">=</span><span class="p">[</span><span class="n">boundarySource</span><span class="p">],</span><span class="n">tdf</span><span class="o">=</span><span class="p">[</span><span class="n">domainSource</span><span class="p">])</span>
+
+<span class="c"># Turn on some output and save run time</span>
+<span class="c"># statistics to sub folder &quot;HeatEquation&quot;</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;verbose&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;drawplot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;output&quot;</span><span class="p">][</span><span class="s">&quot;path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;HeatEquation&quot;</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;output&quot;</span><span class="p">][</span><span class="s">&quot;statistics&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="c"># Solve the problem</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-gray-scott-model">
+<h2>The Gray-Scott model<a class="headerlink" href="#the-gray-scott-model" title="Permalink to this headline">¶</a></h2>
+<p>The Gray-Scott model is a nonlinear reaction-diffusion system which
+consist of a coupled system of two partial differential equations
+given as</p>
+<div class="math">
+<p><img src="_images/math/99e5f6b42782618b80c1f59565467773cba4cdf8.png" alt="\frac{\partial u}{\partial t} &amp; = D_u \nabla^2 u - uv^2 + F(1-u), \\
+\frac{\partial v}{\partial t} &amp;=  D_v \nabla^2 v + uv^2 - (F+k)v," /></p>
+</div><p>where</p>
+<div class="math">
+<p><img src="_images/math/25c8b296f12dfec1c6548764ae0599ffdf97388b.png" alt="D_u, D_v, F, k \in \mathbb{R}." /></p>
+</div><p>We want to solve this system using the parameters
+<img class="math" src="_images/math/8e4a8e527ddfd1132cad079211b6adcf49422149.png" alt="D_u = 8.0 \cdot 10^{-5}" style="vertical-align: -3px"/>, <img class="math" src="_images/math/b52b45a999972c4b04673c18ec3c4e45375b81c8.png" alt="D_v = 4.0" style="vertical-align: -3px"/>,
+<img class="math" src="_images/math/d41429045c975760e52a24f48e0e521fc2171736.png" alt="\cdot 10^{-5}" style="vertical-align: -1px"/>, <img class="math" src="_images/math/d5409dad6a864ea03d0e3ba9c3fe1e6f0f57b081.png" alt="F = 0.024" style="vertical-align: -1px"/>, <img class="math" src="_images/math/0f2f6bc1def87d0b4f74ac36df33c7d3917ca0dd.png" alt="k = 0.060" style="vertical-align: 0px"/> on the
+spatial domain <img class="math" src="_images/math/627bf3b86041b42848a4dd9ffc1b5f325bb86b39.png" alt="\Omega = [0,2]\times[0,2]" style="vertical-align: -5px"/> over the time domain
+<img class="math" src="_images/math/00dc994b8dafa909116a9b5039536d2102bf2c58.png" alt="t\in[0,100]" style="vertical-align: -5px"/>, with homogeneous Neumann boundary conditions and
+initial conditions given as</p>
+<div class="math">
+<p><img src="_images/math/435b3b095175e43f4d35614206ecf5f3f5a097e9.png" alt="u(x,y,0) &amp; = 1-2v(x,y,0), \\[2mm]
+v(x,y,0) &amp; = \begin{cases}0.25 \sin^2(4\pi x) \sin^2(4\pi y) &amp; \text{if } 0.75\leq x,y \leq 1.25, \\
+0 &amp; \text{elsewhere.} \end{cases}" /></p>
+</div><p>The FEniCS code for solving this problem using the ESDIRK module
+can be either be found below <a class="reference external" href="examplecode/GrayScott.py">or downloaded here</a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">gryphon</span> <span class="kn">import</span> <span class="n">ESDIRK</span>
+<span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">power</span><span class="p">,</span><span class="n">pi</span><span class="p">,</span><span class="n">sin</span>
+
+<span class="k">class</span> <span class="nc">InitialConditions</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">between</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],(</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.25</span><span class="p">))</span> <span class="ow">and</span> <span class="n">between</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],(</span><span class="mf">0.75</span><span class="p">,</span><span class="mf">1.25</span><span class="p">)):</span>
+      <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.25</span><span class="o">*</span><span class="n">power</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">power</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="mi">4</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span><span class="mi">2</span><span class="p">)</span>
+      <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+      <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">def</span> <span class="nf">value_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)</span>
+
+<span class="c"># Define mesh, function space and test functions</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">Rectangle</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mi">49</span><span class="p">,</span> <span class="mi">49</span><span class="p">)</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s">&quot;Lagrange&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ME</span> <span class="o">=</span> <span class="n">V</span><span class="o">*</span><span class="n">V</span>
+<span class="n">q1</span><span class="p">,</span><span class="n">q2</span> <span class="o">=</span> <span class="n">TestFunctions</span><span class="p">(</span><span class="n">ME</span><span class="p">)</span>
+
+<span class="c"># Define and interpolate initial condition</span>
+<span class="n">W</span> <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">ME</span><span class="p">)</span>
+<span class="n">W</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">InitialConditions</span><span class="p">())</span>
+<span class="n">u</span><span class="p">,</span><span class="n">v</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">W</span><span class="p">)</span>
+
+<span class="c"># Define parameters in Gray-Scott model</span>
+<span class="n">Du</span>  <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">8.0e-5</span><span class="p">)</span>
+<span class="n">Dv</span>  <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">4.0e-5</span><span class="p">)</span>
+<span class="n">F</span>   <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">0.024</span><span class="p">)</span>
+<span class="n">k</span>   <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">0.06</span><span class="p">)</span>
+
+<span class="c"># Define the right hand side for each of the PDEs</span>
+<span class="n">F1</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">Du</span><span class="o">*</span><span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="n">grad</span><span class="p">(</span><span class="n">q1</span><span class="p">))</span> <span class="o">-</span> <span class="n">u</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">q1</span> <span class="o">+</span> <span class="n">F</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">u</span><span class="p">)</span><span class="o">*</span><span class="n">q1</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span>
+<span class="n">F2</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">Dv</span><span class="o">*</span><span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">),</span><span class="n">grad</span><span class="p">(</span><span class="n">q2</span><span class="p">))</span> <span class="o">+</span> <span class="n">u</span><span class="o">*</span><span class="p">(</span><span class="n">v</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">q2</span> <span class="o">-</span> <span class="p">(</span><span class="n">F</span><span class="o">+</span><span class="n">k</span><span class="p">)</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">q2</span><span class="p">)</span><span class="o">*</span><span class="n">dx</span>
+
+<span class="c"># Define the time domain</span>
+<span class="n">T</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">]</span>
+
+<span class="c"># Create the solver object and adjust tolerance</span>
+<span class="n">obj</span> <span class="o">=</span> <span class="n">ESDIRK</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">W</span><span class="p">,[</span><span class="n">F1</span><span class="p">,</span><span class="n">F2</span><span class="p">])</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;timestepping&quot;</span><span class="p">][</span><span class="s">&quot;absolute_tolerance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-3</span>
+
+<span class="c"># Turn on some output and save run time</span>
+<span class="c"># statistics to sub folder &quot;GrayScott&quot;</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;verbose&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;drawplot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;output&quot;</span><span class="p">][</span><span class="s">&quot;path&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;GrayScott&quot;</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&quot;output&quot;</span><span class="p">][</span><span class="s">&quot;statistics&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="c"># Supress some FEniCS output</span>
+<span class="n">set_log_level</span><span class="p">(</span><span class="n">WARNING</span><span class="p">)</span>
+
+<span class="c"># Solve the problem</span>
+<span class="n">obj</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-cahn-hilliard-equation">
+<h2>The Cahn-Hilliard equation<a class="headerlink" href="#the-cahn-hilliard-equation" title="Permalink to this headline">¶</a></h2>
+<p>The Cahn-Hilliard equation is used to model how the mixture of two
+binary fluids can separate and form domains pure in each component.
+The equation can be written as the following system</p>
+<div class="math">
+<p><img src="_images/math/f8bbc5a013d62a5bef4288770265531b5fbb32fd.png" alt="\frac{\partial u}{\partial t} &amp;= M \nabla^2 v, \\
+0 &amp;= v - \frac{\mathrm{d}f}{\mathrm{d}u} - \lambda \nabla^2 u," /></p>
+</div><p>which, when discretized, will result in a DAE system of index 1.
+We will consider the case when <img class="math" src="_images/math/6c25995181f93693fce888b6918c009681dfa786.png" alt="M = 1.0" style="vertical-align: -1px"/>, <img class="math" src="_images/math/25ec3bc85728e872f334a624186dacc533a5d7ee.png" alt="\lambda = 1\cdot 10^{-2}" style="vertical-align: -1px"/>
+and <img class="math" src="_images/math/2518107b5b4eca5090f7cbcd7510f63c5194becb.png" alt="f = 100u^2(1-u^2)" style="vertical-align: -4px"/> on the spatial domain <img class="math" src="_images/math/cb32bb3e2c136f31d61d0c4148498ceeb0ed4c08.png" alt="\Omega = [0,1] \times [0,1]" style="vertical-align: -5px"/>
+with homogeneous Neumann boundary conditions. In time, we will consider
+the domain <img class="math" src="_images/math/c16b8f8fcfbe714325c1085aee079b99a3ac59a2.png" alt="t \in [0, 4\cdot 10^{-4}]" style="vertical-align: -5px"/>. The following initial conditions will be used:</p>
+<div class="math">
+<p><img src="_images/math/d6faf8278fee97a7b868dd7da31e207281ad8003.png" alt="u(x,y) = 0.63 + 0.02\cdot(0.5 - \chi), \hspace{5mm} \chi \sim Unif[0,1], \hspace{5mm} v(x,y) = 0." /></p>
+</div><p>The FEniCS code for solving this problem using the ESDIRK module
+can be either be found below <a class="reference external" href="examplecode/CahnHilliard.py">or downloaded here</a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">gryphon</span> <span class="kn">import</span> <span class="n">ESDIRK</span>
+<span class="kn">from</span> <span class="nn">dolfin</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="c"># Initial conditions</span>
+<span class="k">class</span> <span class="nc">InitialConditions</span><span class="p">(</span><span class="n">Expression</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="n">MPI</span><span class="o">.</span><span class="n">process_number</span><span class="p">())</span>
+  <span class="k">def</span> <span class="nf">eval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+      <span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.63</span> <span class="o">+</span> <span class="mf">0.02</span><span class="o">*</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">-</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
+      <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+  <span class="k">def</span> <span class="nf">value_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)</span>
+
+<span class="c"># Create mesh and define function spaces</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">UnitSquare</span><span class="p">(</span><span class="mi">49</span><span class="p">,</span> <span class="mi">49</span><span class="p">)</span>
+<span class="n">V</span> <span class="o">=</span> <span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="s">&quot;Lagrange&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">ME</span> <span class="o">=</span> <span class="n">V</span><span class="o">*</span><span class="n">V</span>
+
+<span class="n">q</span><span class="p">,</span><span class="n">v</span> <span class="o">=</span> <span class="n">TestFunctions</span><span class="p">(</span><span class="n">ME</span><span class="p">)</span>
+
+<span class="c"># Define and interpolate initial condition</span>
+<span class="n">u</span>   <span class="o">=</span> <span class="n">Function</span><span class="p">(</span><span class="n">ME</span><span class="p">)</span>
+<span class="n">u</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">InitialConditions</span><span class="p">())</span>
+
+<span class="n">c</span><span class="p">,</span><span class="n">mu</span> <span class="o">=</span> <span class="n">split</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">variable</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+<span class="n">f</span>    <span class="o">=</span> <span class="mi">100</span><span class="o">*</span><span class="n">c</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">c</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+<span class="n">dfdc</span> <span class="o">=</span> <span class="n">diff</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+<span class="n">lmbda</span>  <span class="o">=</span> <span class="n">Constant</span><span class="p">(</span><span class="mf">1.0e-02</span><span class="p">)</span>
+
+<span class="c"># Weak statement of the equations</span>
+<span class="n">f</span> <span class="o">=</span> <span class="o">-</span><span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">mu</span><span class="p">),</span> <span class="n">grad</span><span class="p">(</span><span class="n">q</span><span class="p">))</span><span class="o">*</span><span class="n">dx</span>
+<span class="n">g</span> <span class="o">=</span> <span class="n">mu</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">dx</span> <span class="o">-</span> <span class="n">dfdc</span><span class="o">*</span><span class="n">v</span><span class="o">*</span><span class="n">dx</span> <span class="o">-</span> <span class="n">lmbda</span><span class="o">*</span><span class="n">inner</span><span class="p">(</span><span class="n">grad</span><span class="p">(</span><span class="n">c</span><span class="p">),</span> <span class="n">grad</span><span class="p">(</span><span class="n">v</span><span class="p">))</span><span class="o">*</span><span class="n">dx</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mf">5e-5</span><span class="p">]</span> <span class="c"># Time domain</span>
+
+<span class="n">myobj</span> <span class="o">=</span> <span class="n">ESDIRK</span><span class="p">(</span><span class="n">T</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">g</span><span class="o">=</span><span class="n">g</span><span class="p">)</span>
+<span class="n">myobj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;absolute_tolerance&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1e-2</span>
+<span class="n">myobj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;inconsistent_initialdata&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">myobj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;verbose&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">myobj</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;drawplot&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+<span class="c"># Suppress some FEniCS output</span>
+<span class="n">set_log_level</span><span class="p">(</span><span class="n">WARNING</span><span class="p">)</span>
+
+<span class="c"># Solve the problem</span>
+<span class="n">myobj</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="gryphon.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">User Manual</a><ul>
+<li><a class="reference internal" href="#handling-explicit-time-dependency">Handling Explicit Time Dependency</a></li>
+<li><a class="reference internal" href="#constructing-a-gryphon-object">Constructing a Gryphon Object</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a><ul>
+<li><a class="reference internal" href="#parameter-set-gryphon">Parameter set: gryphon</a><ul>
+<li><a class="reference internal" href="#method">method</a></li>
+<li><a class="reference internal" href="#drawplot">drawplot</a></li>
+<li><a class="reference internal" href="#verbose">verbose</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#parameter-set-output">Parameter set: output</a><ul>
+<li><a class="reference internal" href="#path">path</a></li>
+<li><a class="reference internal" href="#plot">plot</a></li>
+<li><a class="reference internal" href="#statistics">statistics</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#parameter-set-timestepping">Parameter set: timestepping</a><ul>
+<li><a class="reference internal" href="#adaptive">adaptive</a></li>
+<li><a class="reference internal" href="#convergence-criterion">convergence_criterion</a></li>
+<li><a class="reference internal" href="#absolute-tolerance">absolute_tolerance</a></li>
+<li><a class="reference internal" href="#relative-tolerance">relative_tolerance</a></li>
+<li><a class="reference internal" href="#dt">dt</a></li>
+<li><a class="reference internal" href="#dtmax">dtmax</a></li>
+<li><a class="reference internal" href="#dtmin">dtmin</a></li>
+<li><a class="reference internal" href="#inconsistent-initialdata">inconsistent_initialdata</a></li>
+<li><a class="reference internal" href="#pessimistic-factor">pessimistic_factor</a></li>
+<li><a class="reference internal" href="#stepsizeselector">stepsizeselector</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#example-output">Example Output</a></li>
+<li><a class="reference internal" href="#example-problems">Example Problems</a><ul>
+<li><a class="reference internal" href="#the-heat-equation">The Heat Equation</a></li>
+<li><a class="reference internal" href="#the-gray-scott-model">The Gray-Scott model</a></li>
+<li><a class="reference internal" href="#the-cahn-hilliard-equation">The Cahn-Hilliard equation</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ESDIRK.html"
+                        title="previous chapter">ESDIRK</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/User_Guide.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="ESDIRK.html" title="ESDIRK"
+             >previous</a> |</li>
+        <li><a href="gryphon.html">Gryphon v0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Knut Erik Skare.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>

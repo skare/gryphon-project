@@ -1,0 +1,687 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ESDIRK &mdash; Gryphon v0.9.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Gryphon v0.9.0 documentation" href="index.html" />
+    <link rel="next" title="User Manual" href="User_Guide.html" />
+    <link rel="prev" title="gryphon_toolbox" href="gryphon_toolbox.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="User_Guide.html" title="User Manual"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="gryphon_toolbox.html" title="gryphon_toolbox"
+             accesskey="P">previous</a> |</li>
+        <li><a href="gryphon.html">Gryphon v0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="esdirk">
+<h1>ESDIRK<a class="headerlink" href="#esdirk" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="ESDIRK">
+<em class="property">class </em><tt class="descname">ESDIRK</tt><a class="headerlink" href="#ESDIRK" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ESDIRK.__init__">
+<tt class="descclassname">ESDIRK.</tt><tt class="descname">__init__</tt><big>(</big><em>self</em>, <em>T</em>, <em>u</em>, <em>f</em>, <em>g=</em><span class="optional">[</span><span class="optional">]</span>, <em>bcs=</em><span class="optional">[</span><span class="optional">]</span>, <em>tdf=</em><span class="optional">[</span><span class="optional">]</span>, <em>tdfBC=</em><span class="optional">[</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#ESDIRK.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd><ul class="first last">
+<li><p class="first">T: A list with two elements representing the start point and
+end point of the time integration.</p>
+</li>
+<li><p class="first">u: Initial condition. Must be a <tt class="docutils literal"><span class="pre">Function</span></tt>-object.</p>
+</li>
+<li><p class="first">f: List of differential equation components of the
+system <a href="#equation-pdesystem">(1)</a> (first <img class="math" src="_images/math/174fadd07fd54c9afe288e96558c92e0c1da733a.png" alt="n" style="vertical-align: 0px"/> components). Each component
+must be defined as a <tt class="docutils literal"><span class="pre">Form</span></tt>-object. If you are solving a
+linear system of PDEs, the right hand side should be defined as the
+bilinear/linear forms</p>
+<div class="math">
+<p><img src="_images/math/d6b8013e1d45077f248f1420fb4cc1f50c637f3f.png" alt="a(u,v) - \ell(v) = 0 \hspace{5mm} \forall \,\, v \in \hat{V}" /></p>
+</div><p>using <tt class="docutils literal"><span class="pre">TestFunction</span></tt>/<tt class="docutils literal"><span class="pre">TrialFunction</span></tt>-objects to define
+<img class="math" src="_images/math/582756f2f2ea8727397157cfb8638bd8f53138e8.png" alt="a(u,v)" style="vertical-align: -4px"/> and <tt class="docutils literal"><span class="pre">TestFunction</span></tt>/<tt class="docutils literal"><span class="pre">Function</span></tt>-objects to
+define <img class="math" src="_images/math/a9192543717fdd21375d78aac43a0b819e9a3890.png" alt="\ell(v)" style="vertical-align: -4px"/>, in order for Gryphon to use a linear solver.</p>
+<p>If you are solving
+a nonlinear system of PDEs, the right hand side should be defined
+as the semilinear form</p>
+<div class="math">
+<p><img src="_images/math/1e2fc7f79755c96c678ab7abc6563be0f1d80820.png" alt="F(u;v) = 0 \hspace{5mm} \forall \,\, v \in \hat{V}" /></p>
+</div><p>using <tt class="docutils literal"><span class="pre">TestFunction</span></tt>/<tt class="docutils literal"><span class="pre">Function</span></tt>-objects to define <img class="math" src="_images/math/8aae88d703cdbe5e92767f277eec2efb946eabbb.png" alt="F(u;v)" style="vertical-align: -4px"/>,
+in order for Gryphon to use a nonlinear solver.</p>
+</li>
+<li><p class="first">g: List of algebraic equation components of <a href="#equation-pdesystem">(1)</a>. Should
+be defined in the same way as the argument <tt class="docutils literal"><span class="pre">f</span></tt>.</p>
+</li>
+<li><p class="first">bcs: List of <tt class="docutils literal"><span class="pre">DirichletBC</span></tt>-objects which should be applied to
+the system.</p>
+</li>
+<li><p class="first">tdf: If any of the <tt class="docutils literal"><span class="pre">Form</span></tt>-objects corresponding to the right
+hand side of your PDE system contains functions which are
+explicitly time dependent, they must be passed to the ESDIRK-
+constructor via this argument.</p>
+</li>
+<li><p class="first">tdfBC: If any of the <tt class="docutils literal"><span class="pre">DirichletBC</span></tt>-objects contains functions
+which are explicitly time dependent, they must be passed to the
+ESDIRK-constructor via this argument.</p>
+</li>
+</ul>
+</dd>
+</dl>
+<p>The ESDIRK module is designed to solve systems of PDEs which take on
+the following form</p>
+<div class="math" id="equation-pdesystem">
+<p><span class="eqno">(1)</span><img src="_images/math/22de9c4cd72d0a00fe136ecf5ea3e55fd7921050.png" alt="\frac{\partial u_1}{\partial t} &amp;= f_1(\nabla^2U,\nabla U, U, t) \\
+\frac{\partial u_2}{\partial t} &amp;= f_2(\nabla^2U,\nabla U, U, t) \\
+&amp; \vdots \\
+\frac{\partial u_n}{\partial t} &amp;= f_n(\nabla^2U,\nabla U, U, t) \\
+0 &amp;= g_{1}(\nabla^2U,\nabla U, U, t) \\
+0 &amp;= g_{2}(\nabla^2U,\nabla U, U, t) \\
+&amp; \vdots \\
+0 &amp;= g_{m}(\nabla^2U,\nabla U, U, t)" /></p>
+</div><p>with</p>
+<div class="math">
+<p><img src="_images/math/1735acc951615354918076ba1db7ec915a525f02.png" alt="U = U(u_1,u_2,\dots,u_n,\dots,u_{n+m})" /></p>
+</div><p>by first applying a finite element method to the spatial components,
+thus reducing the system of PDEs to either a pure ODE system
+(if <img class="math" src="_images/math/f5507214a312b4e8009e11bba68cd7453d4ba0cf.png" alt="m = 0" style="vertical-align: 0px"/>) or a DAE system.</p>
+<p><strong>Note that the ESDIRK solver only handles index 1 DAEs.</strong></p>
+<p>The ODE/DAE system will then be
+solved by applying an ESDIRK method. The weak form of <a href="#equation-pdesystem">(1)</a>
+will amount to the following:</p>
+<p>Find</p>
+<div class="math">
+<p><img src="_images/math/e9462865b7ea4de5419427be87cc60eb77607127.png" alt="U = u_1 \times u_2 \times \dots \times u_n \times \dots \times u_{n+m} \in \mathcal{V} = \underbrace{V \times \dots \times V}_{n+m \text{ times}}" /></p>
+</div><p>such that</p>
+<div class="math" id="equation-daesystem">
+<p><span class="eqno">(2)</span><img src="_images/math/1ab37992bf25270eb6455a4d4a1e41b187792ca9.png" alt="\int{\frac{\partial u_\alpha}{\partial t} q_\alpha \, d\Omega} &amp;= \int{f_\alpha(\nabla^2U,\nabla U, U, t)q_\alpha \, d\Omega} \\
+0 &amp;= \int{g_{\beta}(\nabla^2U, \nabla U, U, t) q_{n+\beta} \, d\Omega}" /></p>
+</div><p>for all</p>
+<div class="math">
+<p><img src="_images/math/7e17a32f8117f50d960f19a345babc4863ecfb98.png" alt="Q = q_1 \times \dots \times q_{n+m} \in \hat{\mathcal{V}} =  \underbrace{\hat{V} \times \dots \times \hat{V}}_{n+m \text{ times}}, \hspace{5mm} \alpha \in [1,n], \hspace{5mm} \beta \in [1,m]" /></p>
+</div><p>where <img class="math" src="_images/math/cd9ee49f853dac2573f3ac58ba506e67f1451791.png" alt="\mathcal{V}" style="vertical-align: 0px"/> and <img class="math" src="_images/math/c05854a3e15b80a62117645dc658295ff4bd735a.png" alt="\hat{\mathcal{V}}" style="vertical-align: 0px"/> are suitable trial/test spaces.
+We can approximate <a href="#equation-daesystem">(2)</a> by applying a finite element
+method where we seek an approximation <img class="math" src="_images/math/08e5543af0450bea687fbf10131ded6c6c2c2790.png" alt="U^h \approx U" style="vertical-align: 0px"/>
+by finding</p>
+<div class="math">
+<p><img src="_images/math/2198f62d4bb5e4ea4e029d2447e273b87b2d1d13.png" alt="U^h = u^h_1 \times u^h_2 \times \dots \times u^h_n \times \dots \times u^h_{n+m} \in \mathcal{V}^h = \underbrace{V^h \times \dots \times V^h}_{n+m \text{ times}}" /></p>
+</div><p>such that</p>
+<div class="math" id="equation-daesystem_approx">
+<p><span class="eqno">(3)</span><img src="_images/math/2df2439de13fc43a03f1731a0a23f0b729d5fff0.png" alt="\int{\frac{\partial u^h_\alpha}{\partial t} q_\alpha \, d\Omega} &amp;= \int{f_\alpha(\nabla^2U^h,\nabla U^h, U^h, t)q_\alpha \, d\Omega} \\
+0 &amp;= \int{g_{\beta}(\nabla^2U^h, \nabla U^h, U^h, t) q_{n+\beta} \, d\Omega}" /></p>
+</div><p>for all</p>
+<div class="math">
+<p><img src="_images/math/b142614682300dd7b6c02eaf2c1c80ccf3e802cc.png" alt="q_1 \times \dots \times q_{n+m} \in \hat{\mathcal{V}}^h = \underbrace{\hat{V}^h \times \dots \times \hat{V}^h}_{n+m \text{ times}}, \hspace{5mm} \alpha \in [1,n], \hspace{5mm} \beta \in [1,m]" /></p>
+</div><p>where <img class="math" src="_images/math/e399df7869ae18a32efda09cd057f661c7b48fd7.png" alt="\mathcal{V}^h \subset \mathcal{V}" style="vertical-align: -1px"/>
+and <img class="math" src="_images/math/6c165f1a4e0a3eae58db2c4ad9ae0528425b9713.png" alt="\hat{\mathcal{V}}^h \subset \hat{\mathcal{V}}" style="vertical-align: -1px"/>
+have finite dimension. In the following, we drop the superscript
+<img class="math" src="_images/math/8189a5b5a0917b8c93350827be4038af1839139d.png" alt="h" style="vertical-align: 0px"/> on the approximate quantities (except the function spaces)
+to make room for time stepping indices. An <img class="math" src="_images/math/f37bba504894945c07a32f5496d74299a37aa51c.png" alt="s" style="vertical-align: 0px"/>-stage ESDIRK
+method can be applied to approximate <a href="#equation-daesystem_approx">(3)</a> in the
+following way:</p>
+<p>Find <img class="math" src="_images/math/5d75b9d7c42381132d7c4f6924aecdcb0680c48e.png" alt="X_i \in \mathcal{V}" style="vertical-align: -3px"/> such that <a class="footnote-reference" href="#f1" id="id1">[1]</a>:</p>
+<div class="math" id="equation-RK-eqn">
+<p><span class="eqno">(4)</span><img src="_images/math/ceaa6fc069fd7dc3f14cf02e92caa5b8656bd16c.png" alt="\int{(X_i)_\alpha q_\alpha d\Omega} &amp;= \int{\left(u_\alpha^r + \Delta t \sum_{j=1} ^s a_{ij} f_\alpha(\nabla^2 (X_j)_\alpha, \nabla (X_j)_\alpha, (X_j)_\alpha, t^r + \Delta t c_i)\right)q_\alpha d\Omega} \\
+0 &amp;= \int{g_{\beta}(\nabla^2 (X_j)_{n+\beta}, \nabla (X_j)_{n+\beta}, (X_j)_{n+\beta}, t^r + \Delta t c_i)q_{n+\beta} d\Omega}" /></p>
+</div><p>for all</p>
+<div class="math">
+<p><img src="_images/math/924105deb6e83e46ca137ad0441671ba4fd927ff.png" alt="q_1 \times \dots \times q_{n+m} \in \hat{\mathcal{V}}^h, \hspace{5mm} \alpha \in [1,n], \hspace{5mm} \beta \in [1,m], \hspace{5mm} i \in [2,s]." /></p>
+</div><p>Note that <img class="math" src="_images/math/9349cd0ca17cdb470b68e894dfa499dffeea692e.png" alt="u^r" style="vertical-align: 0px"/> refers to the <img class="math" src="_images/math/b55ca7a0aa88ab7d58f4fc035317fdac39b17861.png" alt="r" style="vertical-align: 0px"/>-th time step at time
+<img class="math" src="_images/math/6f23135d60cf3ba3de8493e8b12a1392b534b800.png" alt="t^r" style="vertical-align: 0px"/>. Since the ESDIRK methods implemented in Gryphon are
+stiffly accurate, the time step update is simply</p>
+<div class="math">
+<p><img src="_images/math/4263c5668d7a1ea1ef93eee024185a7be099f323.png" alt="U^{r+1} = X_s." /></p>
+</div><p class="rubric">Footnotes</p>
+<table class="docutils footnote" frame="void" id="f1" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[1]</a></td><td>Remember that <img class="math" src="_images/math/5f8e5cbb6204882df1cf17cfe4b308d485af8056.png" alt="X_i" style="vertical-align: -3px"/> has <img class="math" src="_images/math/44b29f9d3a94abde3804e0f1c34f521d81241e41.png" alt="n+m" style="vertical-align: -1px"/> components. We write <img class="math" src="_images/math/697dc9293944173b4ec5b2dfaf2ff5d62ab633fb.png" alt="(X_i)_\alpha" style="vertical-align: -4px"/> to refer to component <img class="math" src="_images/math/10f32377ac67d94f764f12a15ea987e88c85d3e1.png" alt="\alpha" style="vertical-align: 0px"/> of <img class="math" src="_images/math/5f8e5cbb6204882df1cf17cfe4b308d485af8056.png" alt="X_i" style="vertical-align: -3px"/>. These quantities are known as the <em>stage values</em> in Runge-Kutta theory.</td></tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="getLinearVariationalForms">
+<tt class="descname">getLinearVariationalForms</tt><big>(</big><em>B</em>, <em>X</em><big>)</big><a class="headerlink" href="#getLinearVariationalForms" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd><ul class="first last simple">
+<li>B: Butcher tableau for the selected ESDIRK method.</li>
+<li>X: List of <img class="math" src="_images/math/f74d52f7378384fa067e7726071a01e3ee643edf.png" alt="s-1" style="vertical-align: -1px"/> <tt class="docutils literal"><span class="pre">Function</span></tt>-objects which are used
+to store the stage values.</li>
+</ul>
+</dd>
+</dl>
+<p>In the following we assume that we have a problem where
+<img class="math" src="_images/math/6fee383e85697dbf6bc5c5e5550c11001f3df6e7.png" alt="n,m &gt; 1" style="vertical-align: -4px"/>. If you are solving a problem with only one
+ODE-component, the code is slightly different due to the way FEniCS
+treats <tt class="docutils literal"><span class="pre">Function</span></tt>-objects with one component versus many components.
+The code is however completely analogous to the below presentation.</p>
+<p>This method constructs <tt class="docutils literal"><span class="pre">Form</span></tt>-objects corresponding to
+the right hand side of <a href="#equation-RK-eqn">(4)</a> when all the functions
+<img class="math" src="_images/math/b3f2a1911cc39ac49e935c84d79d33cf0fa549ad.png" alt="f_\alpha,g_\beta" style="vertical-align: -6px"/> are assumed to be linear. First the method
+creates copies of the user-supplied time dependent functions (sent
+via the keyword argument <tt class="docutils literal"><span class="pre">tdf</span></tt>) as such</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Get the number of stage values</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c"># Generate copies of time dependent functions</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">))]</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">)):</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;CompiledExpression&quot;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Expression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">cppcode</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tstart</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">__class__</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>These copies will be needed when the stage derivatives are to be
+evaluated for the correct time values (<img class="math" src="_images/math/cc520d586bc0d83ca5167363c470034ab92be0c0.png" alt="t_n + c_i \Delta t_n" style="vertical-align: -3px"/>).
+One copy per function per stage value is created.</p>
+<p>Next, <img class="math" src="_images/math/f74d52f7378384fa067e7726071a01e3ee643edf.png" alt="s-1" style="vertical-align: -1px"/> <tt class="docutils literal"><span class="pre">Form</span></tt>-objects are initialized with the following
+terms from <a href="#equation-RK-eqn">(4)</a>. Note that <tt class="docutils literal"><span class="pre">self.U</span></tt> is a <tt class="docutils literal"><span class="pre">TrialFunction</span></tt>
+and that everything is moved to the left hand side of the equation.</p>
+<div class="math">
+<p><img src="_images/math/a6ffe172a764167c4c68e386603e8cc8e35416a7.png" alt="\int{(X_i)_\alpha q_\alpha d\Omega} - \int{u_\alpha^r q_\alpha d\Omega}, \hspace{5mm} \alpha \in [1,n], \hspace{5mm} i \in&nbsp;[2,s]." /></p>
+</div><div class="highlight-python"><div class="highlight"><pre><span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="nb">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">),[</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span><span class="o">*</span><span class="n">dx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span><span class="o">*</span><span class="n">dx</span> <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>Next, the sum over the stage derivatives,</p>
+<div class="math">
+<p><img src="_images/math/ad4b928c8ed3b5f60bb50bc5bd9102f973464a9a.png" alt="-\int{\Delta t \sum_{j=1} ^s a_{ij} f_\alpha(\nabla^2 (X_j)_\alpha , \nabla (X_j)_\alpha , (X_j)_\alpha , t^r + \Delta t c_i)q_\alpha d\Omega}, \hspace{5mm} \alpha \in [1,n]," /></p>
+</div><p>is taken care of by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">)):</span>
+      <span class="n">R</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DT</span><span class="o">*</span><span class="n">B</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span><span class="n">R</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+      <span class="n">R</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">)):</span>
+        <span class="n">R</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+      <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DT</span><span class="o">*</span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">action</span><span class="p">(</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="n">alpha</span><span class="p">],</span><span class="n">R</span><span class="p">),</span><span class="n">X</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Note that the last term in the sum is defined via a <tt class="docutils literal"><span class="pre">TrialFunction</span></tt>
+in order to make it a part of the bilinear form <img class="math" src="_images/math/582756f2f2ea8727397157cfb8638bd8f53138e8.png" alt="a(u,v)" style="vertical-align: -4px"/>.
+The rest of the sum is made a part of the linear form <img class="math" src="_images/math/a9192543717fdd21375d78aac43a0b819e9a3890.png" alt="\ell(v)" style="vertical-align: -4px"/>
+by using the <tt class="docutils literal"><span class="pre">action</span></tt>-function. Finally, the algebraic equations,</p>
+<div class="math">
+<p><img src="_images/math/1a87672e0166e69732ed3d8400856a680fa08688.png" alt="\int{g_{\beta}(\nabla^2 (X_i)_{n+\beta}, \nabla (X_i)_{n+\beta}, (X_i)_{n+\beta}, t^r + \Delta t c_i)q_{n+\beta} d\Omega}, \hspace{5mm} \beta \in [1,m]," /></p>
+</div><p>are added by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">beta</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">)):</span>
+      <span class="n">R</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">[</span><span class="n">beta</span><span class="p">],</span><span class="n">R</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The purpose of the dictionary <tt class="docutils literal"><span class="pre">R</span></tt>
+is to make sure that any explicit time dependent functions are
+evaluated in the correct points in time by substituting in the copies
+created in the beginning.</p>
+<p>To sum up, we now have <img class="math" src="_images/math/f74d52f7378384fa067e7726071a01e3ee643edf.png" alt="s-1" style="vertical-align: -1px"/> <tt class="docutils literal"><span class="pre">Form</span></tt>-objects on the form</p>
+<div class="math">
+<p><img src="_images/math/911baa85455c22ac1e41f253506e8df0c44df8f3.png" alt="a_i(X_i,q) - \ell_i(q) = 0, \hspace{5mm} i \in&nbsp;[2,s]" /></p>
+</div><p>where</p>
+<div class="math">
+<p><img src="_images/math/260015b6444aea81997bfb09d6a6ff32d7cbfba4.png" alt="a_i(X_i,q) &amp;= \begin{bmatrix}\displaystyle \int{\left((X_i)_\alpha -\Delta t a_{is} f_\alpha(\nabla^2 X_{s,\alpha}, \nabla X_{s,\alpha}, X_{s,\alpha}, t^r + \Delta t c_i) \right)q_\alpha d\Omega} \\ \displaystyle \int{g_{\beta}(\nabla^2 (X_i)_{n+\beta}, \nabla (X_i)_{n+\beta}, (X_i)_{n+\beta}, t^r + \Delta t c_i)q_{n+\beta} d\Omega} \end{bmatrix}, \\
+\ell_i(q) &amp;= \begin{bmatrix}\displaystyle \int{\left(u_\alpha^r  + \Delta t \sum_{j=2} ^{s-1} a_{ij} f_\alpha(\nabla^2 (X_j)_\alpha , \nabla (X_j)_\alpha , (X_j)_\alpha , t^r + \Delta t c_i)\right)q_\alpha d\Omega} \\ 0 \end{bmatrix}, \hspace{5mm} \alpha \in [1,n] \hspace{5mm} \beta \in [1,m]." /></p>
+</div><p>These forms can now be handled by the linear solvers included
+in the FEniCS framework. Note that, when expanded, the functions
+<img class="math" src="_images/math/b2f35154c6674fdc437c6bd6351cc42a140f6152.png" alt="f_\alpha" style="vertical-align: -4px"/> and <img class="math" src="_images/math/730e799375d8fd45bdff98a417c7b3687bc1cf8e.png" alt="g_\beta" style="vertical-align: -6px"/> may contain terms which belong in the linear
+form <img class="math" src="_images/math/cfcdd5e5af65444404c4473b375e6ca82ec4bdbd.png" alt="\ell_i(q)" style="vertical-align: -4px"/>. Gryphon will take care of this automatically.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="getNonlinearVariationalForms">
+<tt class="descname">getNonlinearVariationalForms</tt><big>(</big><em>B</em>, <em>X</em><big>)</big><a class="headerlink" href="#getNonlinearVariationalForms" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Input:</dt>
+<dd><ul class="first last simple">
+<li>B: Butcher tableau for the selected ESDIRK method.</li>
+<li>X: List of <img class="math" src="_images/math/f74d52f7378384fa067e7726071a01e3ee643edf.png" alt="s-1" style="vertical-align: -1px"/> <tt class="docutils literal"><span class="pre">Function</span></tt>-objects which are used
+to store the stage values.</li>
+</ul>
+</dd>
+</dl>
+<p>In the following we assume that we have a problem where
+<img class="math" src="_images/math/6fee383e85697dbf6bc5c5e5550c11001f3df6e7.png" alt="n,m &gt; 1" style="vertical-align: -4px"/>. If you are solving a problem with only one
+ODE-component, the code is slightly different due to the way FEniCS
+treats <tt class="docutils literal"><span class="pre">Function</span></tt>-objects with one component versus many components.
+The code is however completely analogous to the below presentation.</p>
+<p>This method constructs <tt class="docutils literal"><span class="pre">Form</span></tt>-objects corresponding to
+the right hand side of <a href="#equation-RK-eqn">(4)</a> when all the functions
+<img class="math" src="_images/math/b3f2a1911cc39ac49e935c84d79d33cf0fa549ad.png" alt="f_\alpha,g_\beta" style="vertical-align: -6px"/> are assumed to be nonlinear. First the method
+creates copies of the user-supplied time dependent functions (sent
+via the keyword argument <tt class="docutils literal"><span class="pre">tdf</span></tt>) as such</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Get the number of stage values</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="c"># Generate copies of time dependent functions</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">))]</span>
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">)):</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;CompiledExpression&quot;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Expression</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">cppcode</span><span class="p">,</span><span class="n">t</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tstart</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">__class__</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>These copies will be needed when the stage derivatives are to be
+evaluated for the correct time values (<img class="math" src="_images/math/cc520d586bc0d83ca5167363c470034ab92be0c0.png" alt="t_n + c_i \Delta t_n" style="vertical-align: -3px"/>).
+One copy per function per stage value is created.</p>
+<p>Next, <img class="math" src="_images/math/f74d52f7378384fa067e7726071a01e3ee643edf.png" alt="s-1" style="vertical-align: -1px"/> <tt class="docutils literal"><span class="pre">Form</span></tt>-objects are initialized with the following
+terms from <a href="#equation-RK-eqn">(4)</a>. Note that everything is moved to the left
+hand side of the equation.</p>
+<div class="math">
+<p><img src="_images/math/a6ffe172a764167c4c68e386603e8cc8e35416a7.png" alt="\int{(X_i)_\alpha q_\alpha d\Omega} - \int{u_\alpha^r q_\alpha d\Omega}, \hspace{5mm} \alpha \in [1,n], \hspace{5mm} i \in&nbsp;[2,s]." /></p>
+</div><div class="highlight-python"><div class="highlight"><pre><span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="nb">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">),[</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span><span class="o">*</span><span class="n">dx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="n">alpha</span><span class="p">]</span><span class="o">*</span><span class="n">dx</span> <span class="k">for</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>Next, the sum over the stage derivatives,</p>
+<div class="math">
+<p><img src="_images/math/b3a8347cc72a88e71a4024b3028c060315bdf386.png" alt="-\int{\Delta t \sum_{j=1} ^s a_{ij} f_\alpha(\nabla^2 (X_j)_\alpha, \nabla (X_j)_\alpha, (X_j)_\alpha, t^r + \Delta t c_i)q_\alpha d\Omega}, \hspace{5mm} \alpha \in [1,n]," /></p>
+</div><p>is taken care of by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Add differential equations</span>
+<span class="n">L</span> <span class="o">=</span> <span class="p">[</span><span class="nb">reduce</span><span class="p">((</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">:</span><span class="n">x</span><span class="o">+</span><span class="n">y</span><span class="p">),[</span><span class="n">X</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">D</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="n">D</span><span class="p">]</span><span class="o">*</span><span class="n">dx</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[</span><span class="n">D</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">[</span><span class="n">D</span><span class="p">]</span><span class="o">*</span><span class="n">dx</span> <span class="k">for</span> <span class="n">D</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">)])</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+<span class="k">for</span> <span class="n">D</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+      <span class="n">replaceDict</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">:</span><span class="n">X</span><span class="p">[</span><span class="n">j</span><span class="p">]}</span>
+      <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">)):</span>
+        <span class="n">replaceDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+      <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">DT</span><span class="o">*</span><span class="n">B</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">*</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">f</span><span class="p">[</span><span class="n">D</span><span class="p">],</span><span class="n">replaceDict</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, the algebraic equations,</p>
+<div class="math">
+<p><img src="_images/math/1a87672e0166e69732ed3d8400856a680fa08688.png" alt="\int{g_{\beta}(\nabla^2 (X_i)_{n+\beta}, \nabla (X_i)_{n+\beta}, (X_i)_{n+\beta}, t^r + \Delta t c_i)q_{n+\beta} d\Omega}, \hspace{5mm} \beta \in [1,m]," /></p>
+</div><p>are added by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Add algebraic equations</span>
+<span class="k">for</span> <span class="n">D</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="n">replaceDict</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">:</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]}</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">)):</span>
+      <span class="n">replaceDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tdf</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">L</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">[</span><span class="n">D</span><span class="p">],{</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">:</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="solve">
+<tt class="descname">solve</tt><big>(</big><big>)</big><a class="headerlink" href="#solve" title="Permalink to this definition">¶</a></dt>
+<dd><p>The <tt class="docutils literal"><span class="pre">solve</span></tt>-method is responsible for both initializing and
+performing the timestepping process. The code will be explained
+in its entirety below.</p>
+<p>First, record the CPU/wall time by using the built-in Python library
+<tt class="docutils literal"><span class="pre">time</span></tt></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">cpustart</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span>
+<span class="n">wallclockstart</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">timestepTimer</span> <span class="o">=</span> <span class="mf">0.0</span>
+</pre></div>
+</div>
+<p>The variable <tt class="docutils literal"><span class="pre">self.iterationTimer</span></tt> will be used to time a single
+time step and will be used to estimate the remaining run-time of the
+program. Next, fetch user specified options from the
+parameter-object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">updateParameters</span><span class="p">()</span>
+<span class="n">stepsizeselector</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stepsizeselector</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;stepsizeselector&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Note that <tt class="docutils literal"><span class="pre">self.stepsizeselector</span></tt> is a dictionary containing
+function handles to the available step size selectors. It is defined
+in the class <a class="reference internal" href="gryphon_toolbox.html#gryphon_toolbox" title="gryphon_toolbox"><tt class="xref py py-func docutils literal"><span class="pre">gryphon_toolbox()</span></tt></a>. This class also contains
+the method <a class="reference internal" href="gryphon_toolbox.html#updateParameters" title="updateParameters"><tt class="xref py py-func docutils literal"><span class="pre">updateParameters()</span></tt></a>.</p>
+<p>Next, the Butcher table corresponding to the desired method is loaded
+by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">B</span> <span class="o">=</span> <span class="n">getTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;method&#39;</span><span class="p">])</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">B</span><span class="p">[</span><span class="s">&#39;tableau&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>A list of <tt class="docutils literal"><span class="pre">Function</span></tt>-objects is created for storing the stage
+values</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">X</span>  <span class="o">=</span> <span class="p">[</span><span class="n">Function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>before the correct variational forms are loaded</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear</span><span class="p">:</span>
+  <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLinearVariationalForms</span><span class="p">(</span><span class="n">B</span><span class="p">[</span><span class="s">&#39;tableau&#39;</span><span class="p">],</span><span class="n">X</span><span class="p">)</span>
+  <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">linearESDIRK</span><span class="p">(</span><span class="n">lhs</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span><span class="n">rhs</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+<span class="k">else</span><span class="p">:</span>
+  <span class="n">l</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getNonlinearVariationalForms</span><span class="p">(</span><span class="n">B</span><span class="p">[</span><span class="s">&#39;tableau&#39;</span><span class="p">],</span><span class="n">X</span><span class="p">)</span>
+  <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">derivative</span><span class="p">(</span><span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">U</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+  <span class="n">p</span> <span class="o">=</span> <span class="p">[</span><span class="n">nonlinearESDIRK</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">l</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">,</span><span class="n">XJ</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>For details, check <a class="reference internal" href="#getLinearVariationalForms" title="getLinearVariationalForms"><tt class="xref py py-func docutils literal"><span class="pre">getLinearVariationalForms()</span></tt></a>,
+<a class="reference internal" href="#getNonlinearVariationalForms" title="getNonlinearVariationalForms"><tt class="xref py py-func docutils literal"><span class="pre">getNonlinearVariationalForms()</span></tt></a>, <a class="reference internal" href="#linearESDIRK" title="linearESDIRK"><tt class="xref py py-func docutils literal"><span class="pre">linearESDIRK()</span></tt></a> and
+<a class="reference internal" href="#nonlinearESDIRK" title="nonlinearESDIRK"><tt class="xref py py-func docutils literal"><span class="pre">nonlinearESDIRK()</span></tt></a>. Initialization of plotting/
+saving of function(s) is performed by calling</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">figureHandling</span><span class="p">(</span><span class="n">Init</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We now enter the time stepping loop. It starts by recording the
+wall time at the beginning of the time step and then updates
+the first (explicit) stage value</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+  <span class="n">timestepStart</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+  <span class="c"># Explicit first stage</span>
+  <span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span>
+</pre></div>
+</div>
+<p>The number of stages to compute is then determined. If the user
+wants to use adaptive step size selection, all the stages must be
+computed in order to form the estimate for the local error. If the
+user wants to use fixed step size, on the other hand, only the stages
+contributing to the advancing method needs to be computed. As an
+example, if the user selects ESDIRK43b which in total is a 5 stage
+method where stage 4 is used as advancing method, stage 5 will never
+be computed.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;adaptive&#39;</span><span class="p">]:</span>
+  <span class="n">S</span> <span class="o">=</span> <span class="n">s</span><span class="o">-</span><span class="mi">1</span>
+<span class="k">elif</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;adaptive&#39;</span><span class="p">]:</span>
+  <span class="n">S</span> <span class="o">=</span> <span class="n">B</span><span class="p">[</span><span class="s">&#39;advSt&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The following code is executed if the user has flagged for
+inconsistent initial data</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;inconsistent_initialdata&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nAcc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nRej</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+  <span class="n">initdt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dtmin</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">DT</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtmin</span><span class="p">)</span>
+<span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;inconsistent_initialdata&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nAcc</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">nRej</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">dt</span> <span class="o">=</span> <span class="n">initdt</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">DT</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">initdt</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Functions which depend explicitly on the variable <img class="math" src="_images/math/e0d2bf360290fd61d1c1557e763f2622363b3d35.png" alt="t" style="vertical-align: 0px"/> is
+updated to <img class="math" src="_images/math/7505af685cd9fc4a7025c63653c43873b1f7f451.png" alt="t_n + c_i \Delta t" style="vertical-align: -3px"/>.
+Note that <img class="math" src="_images/math/909d5a8f6938a5191731b3f3f0237c3b6213dd96.png" alt="c_i = \sum_{j=1}^s a_{ij}" style="vertical-align: -8px"/>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">)):</span>
+  <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">S</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tdfButcher</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">B</span><span class="p">[</span><span class="s">&#39;tableau&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">,:])</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+
+<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">S</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">F</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tdfBC</span><span class="p">:</span>
+    <span class="n">F</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">B</span><span class="p">[</span><span class="s">&#39;tableau&#39;</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,:])</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+</pre></div>
+</div>
+<p>Next, the implicit stages are solved by calling either the linear
+or the nonlinear solver</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">S</span><span class="p">):</span>
+  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear</span><span class="p">:</span>
+    <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">],</span><span class="n">X</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">())</span>
+</pre></div>
+</div>
+<p>If the user is using adaptive step size selection, the following
+code is executed</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;adaptive&#39;</span><span class="p">]:</span>
+  <span class="n">le</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">s</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">()</span> <span class="o">-</span> <span class="n">X</span><span class="p">[</span><span class="n">s</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">vector</span><span class="p">(),</span><span class="s">&#39;l2&#39;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">acceptStep</span><span class="p">(</span><span class="n">le</span><span class="p">,</span><span class="n">X</span><span class="p">[</span><span class="n">B</span><span class="p">[</span><span class="s">&#39;advSt&#39;</span><span class="p">]]):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">B</span><span class="p">[</span><span class="s">&#39;advSt&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">vector</span><span class="p">()[:]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">breakTimeLoop</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">accepted_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dt</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nAcc</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">stepAccepted</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">consecutive_rejects</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;verbose&#39;</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">printProgress</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimateRuntime</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nRej</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">consecutive_rejects</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">stepAccepted</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stepRejected</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rejected_steps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rejected_steps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;verbose&#39;</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">printProgress</span><span class="p">(</span><span class="n">rejectedStep</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>First, the local error is calculated and sent to <a class="reference internal" href="gryphon_toolbox.html#acceptStep" title="acceptStep"><tt class="xref py py-func docutils literal"><span class="pre">acceptStep()</span></tt></a>
+in order to verify whether or not to accept the current step. If it
+should be accepted, <tt class="docutils literal"><span class="pre">self.u</span></tt> is updated, the current step size is
+recorded (except for the last step since it may be artificially short
+if the previous step was close to the end of the time domain),
+and some flags used for the step size selectors are set.</p>
+<p>If the user is using constant step size, the following code is
+executed</p>
+<div class="highlight-python"><pre>elif not self.parameters['timestepping']['adaptive']:
+  self.u.vector()[:] = X[B['advSt']].vector()[:]
+  self.t += self.dt
+  if self.parameters['verbose']:
+    self.printProgress(self.estimateRuntime)</pre>
+</div>
+<p>For more details, check <a class="reference internal" href="gryphon_toolbox.html#dtGustafsson" title="dtGustafsson"><tt class="xref py py-func docutils literal"><span class="pre">dtGustafsson()</span></tt></a>,
+<a class="reference internal" href="gryphon_toolbox.html#dtStandard" title="dtStandard"><tt class="xref py py-func docutils literal"><span class="pre">dtStandard()</span></tt></a> and
+<a class="reference internal" href="gryphon_base.html#printProgress" title="printProgress"><tt class="xref py py-func docutils literal"><span class="pre">printProgress()</span></tt></a>. Next, plots are updated
+and/or saved by calling</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">figureHandling</span><span class="p">(</span><span class="n">Update</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>before a new stepsize is selected by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;timestepping&#39;</span><span class="p">][</span><span class="s">&#39;adaptive&#39;</span><span class="p">]:</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">stepsizeselector</span><span class="p">(</span><span class="n">le</span><span class="p">,</span><span class="n">B</span><span class="p">[</span><span class="s">&#39;order&#39;</span><span class="p">],</span><span class="n">stepAccepted</span><span class="p">)</span>
+  <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+    <span class="n">terminateReason</span> <span class="o">=</span> <span class="s">&quot;StationarySolution&quot;</span>
+    <span class="k">break</span>
+</pre></div>
+</div>
+<p>If the stepsize selector fails with a <tt class="docutils literal"><span class="pre">ZeroDivisionError</span></tt>, it is
+because the local error estimated in that time step is zero machine
+precision. The program will then terminate with some informative
+output to the user.</p>
+<p>If the time step was selected successfully, it is verified by
+calling</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">verifyStepSize</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>before the run-time of the current timestep iteration is recorded by</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">timestepTimer</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timestepStart</span>
+</pre></div>
+</div>
+<p>This marks the end of the time stepping loop. For more details, see
+<a class="reference internal" href="gryphon_toolbox.html#verifyStepSize" title="verifyStepSize"><tt class="xref py py-func docutils literal"><span class="pre">verifyStepSize()</span></tt></a>. Finally the program
+sums up the number of function/Jacobian assemblies (if a NewtonSolver
+was used), records the total run-time of the <tt class="docutils literal"><span class="pre">solve()</span></tt>-method and
+then sends it to <a class="reference internal" href="gryphon_toolbox.html#generateOutput" title="generateOutput"><tt class="xref py py-func docutils literal"><span class="pre">generateOutput()</span></tt></a> in order
+to produce the desired output specified by the user.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="bp">self</span><span class="o">.</span><span class="n">cputime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">clock</span><span class="p">()</span> <span class="o">-</span> <span class="n">cpustart</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">walltime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">wallclockstart</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear</span><span class="p">:</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Feval</span> <span class="o">+=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Feval</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Jeval</span> <span class="o">+=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">Jeval</span>
+<span class="bp">self</span><span class="o">.</span><span class="n">generateOutput</span><span class="p">(</span><span class="n">terminateReason</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="estimateRuntime">
+<tt class="descname">estimateRuntime</tt><big>(</big><big>)</big><a class="headerlink" href="#estimateRuntime" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method gives a rough estimate for the remaining run time
+of the program. The estimate is calculated in the following way:</p>
+<div class="math">
+<p><img src="_images/math/072d2e60b297cd76ae3a2baaf7d20c3a733ed77f.png" alt="\text{estimate} = \frac{\text{Wall time in previous iteration}}{\text{Mean of selected step sizes}}\cdot \text{remaining time interval}." /></p>
+</div><p>The estimate is printed to screen if the parameter</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">solverObject</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s">&#39;verbose&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>and the time stepping process has advanced more than 1% into the
+domain.</p>
+</dd></dl>
+
+<div class="section" id="support-classes">
+<h2>Support classes<a class="headerlink" href="#support-classes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="nonlinearESDIRK">
+<em class="property">class </em><tt class="descname">nonlinearESDIRK</tt><big>(</big><em>NonlinearProblem</em><big>)</big><a class="headerlink" href="#nonlinearESDIRK" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is required for FEniCS to work with nonlinear problems.
+It must contain a method for evaluating the semilinear form <img class="math" src="_images/math/a055f405829e64a3b70253ab67cb45ed6ed5bb29.png" alt="F" style="vertical-align: 0px"/>
+corresponding to the nonlinear variational problem</p>
+<div class="math">
+<p><img src="_images/math/c3dcaf164aa4794b2a02829addeac647bca9f3cb.png" alt="F(u;v) = 0 \hspace{5mm} \forall v \in \hat{\mathcal{V}}" /></p>
+</div><p>as well as the Jacobian. These methods are named
+<tt class="xref py py-func docutils literal"><span class="pre">F()</span></tt> and <tt class="xref py py-func docutils literal"><span class="pre">J()</span></tt>. The code for the class is shown in
+its entirety below.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">nonlinearESDIRK</span><span class="p">(</span><span class="n">NonlinearProblem</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">bcs</span><span class="p">):</span>
+    <span class="n">NonlinearProblem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">l</span> <span class="o">=</span> <span class="n">l</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span> <span class="o">=</span> <span class="n">bcs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Jeval</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Feval</span> <span class="o">=</span> <span class="mi">0</span>
+
+  <span class="k">def</span> <span class="nf">F</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Feval</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">assemble</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l</span><span class="p">,</span><span class="n">tensor</span><span class="o">=</span><span class="n">b</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">:</span>
+        <span class="n">i</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">b</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">J</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">Jeval</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">assemble</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span><span class="n">tensor</span><span class="o">=</span><span class="n">A</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">:</span>
+        <span class="n">i</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="linearESDIRK">
+<em class="property">class </em><tt class="descname">linearESDIRK</tt><a class="headerlink" href="#linearESDIRK" title="Permalink to this definition">¶</a></dt>
+<dd><p>The purpose of this class is to act as a wrapper for the linear
+variational forms corresponding to each stage value when solving
+a system of linear PDEs. The class contains a bilinear form and a
+linear form corresponding to solving</p>
+<div class="math">
+<p><img src="_images/math/f1bb201ed5aa06545351829de147417516a9b4b2.png" alt="a(u,v) = \ell(v) \hspace{5mm} \forall v \in \hat{\mathcal{V}}" /></p>
+</div><p>The code for the class is shown in its entirety below.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">linearESDIRK</span><span class="p">:</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">bcs</span><span class="p">,</span> <span class="n">solver</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">l</span> <span class="o">=</span> <span class="n">l</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span> <span class="o">=</span> <span class="n">bcs</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
+
+  <span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
+      <span class="n">A</span> <span class="o">=</span> <span class="n">assemble</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span>
+      <span class="n">b</span> <span class="o">=</span> <span class="n">assemble</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">l</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">bcs</span><span class="p">:</span>
+          <span class="n">i</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+          <span class="n">i</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">b</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="gryphon.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ESDIRK</a><ul>
+<li><a class="reference internal" href="#support-classes">Support classes</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="gryphon_toolbox.html"
+                        title="previous chapter">gryphon_toolbox</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="User_Guide.html"
+                        title="next chapter">User Manual</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/ESDIRK.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="User_Guide.html" title="User Manual"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="gryphon_toolbox.html" title="gryphon_toolbox"
+             >previous</a> |</li>
+        <li><a href="gryphon.html">Gryphon v0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Knut Erik Skare.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>

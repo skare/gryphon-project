@@ -1,0 +1,188 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Gryphon documentation &mdash; Gryphon v0.9.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.9.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Gryphon v0.9.0 documentation" href="index.html" />
+    <link rel="next" title="gryphon_base" href="gryphon_base.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="gryphon_base.html" title="gryphon_base"
+             accesskey="N">next</a> |</li>
+        <li><a href="#">Gryphon v0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="gryphon-documentation">
+<h1>Gryphon documentation<a class="headerlink" href="#gryphon-documentation" title="Permalink to this headline">¶</a></h1>
+<p>The goal of Gryphon is to provide a set of intuitive tools for sovling
+time dependent partial differential equations. It is built upon the
+Python interface of the FEniCS framework.</p>
+<p>This document consist of two parts.</p>
+<p>The first part provides a detailed presentation of the core components
+which make up Gryphon. It is not required to read this part in order
+to use the program. It will however be more useful if you are thinking
+of realizing a time integrator of your own, within Gryphon.</p>
+<p>The second part is a user manual which describe what parameters
+are available when working with Gryphon and what they do. There are
+also code examples for solving a single time dependent PDE as well
+as a system, in order to get you started on solving your own problems.</p>
+<p>It is assumed that the reader is familiar with the FEniCS framework.</p>
+<p>The reason behind the class hierarchy in Gryphon is as follows:</p>
+<blockquote>
+<ul class="simple">
+<li><a class="reference internal" href="gryphon_base.html#gryphon_base" title="gryphon_base"><tt class="xref py py-func docutils literal"><span class="pre">gryphon_base()</span></tt></a></li>
+</ul>
+<p>This class is the highest superclass in the Gryphon hierarchy. Its
+constructor is responsible for assigning a variety of class variables
+to be used in both the gryphon_toolbox-class and the
+time_integrator-class. It is also contains methods for input
+verification, printing of program progress and error handling. In short,
+it is designed to be a platform for which to build tools for doing time
+integration, and for the time integrators themselves.</p>
+<ul class="simple">
+<li><a class="reference internal" href="gryphon_toolbox.html#gryphon_toolbox" title="gryphon_toolbox"><tt class="xref py py-func docutils literal"><span class="pre">gryphon_toolbox()</span></tt></a></li>
+</ul>
+<p>This class is intended to contain tools found useful when implementing
+a time integrator. This resonates well with the DRY principle in the
+sense that we collect tools relevant for several time integrators in
+one place which, makes for easy maintenance. Notable tools in this
+class includes step size selectors and methods for output generation
+(run time statistics, plot of accepted/rejected step sizes).</p>
+<ul class="simple">
+<li>time_integrator</li>
+</ul>
+<p>This final class layer is intended to contain the realization of some
+time integrator. Each class in this layer must contain the code for
+augmenting a user specified UFL form with the code amounting to
+applying the desired time integrator.</p>
+<p>The only implemented methods so far are <a class="reference internal" href="ESDIRK.html#ESDIRK" title="ESDIRK"><tt class="xref py py-func docutils literal"><span class="pre">ESDIRK()</span></tt></a> methods which allows
+for both fixed and adaptive timestepping. To read in detail about
+the classes and methods, click the links below.</p>
+</blockquote>
+<p>Contents:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gryphon_base.html">gryphon_base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gryphon_toolbox.html">gryphon_toolbox</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="gryphon_toolbox.html#output-handling">Output handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gryphon_toolbox.html#step-size-selectors">Step size selectors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ESDIRK.html">ESDIRK</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ESDIRK.html#support-classes">Support classes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="User_Guide.html">User Manual</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="User_Guide.html#handling-explicit-time-dependency">Handling Explicit Time Dependency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="User_Guide.html#constructing-a-gryphon-object">Constructing a Gryphon Object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="User_Guide.html#parameters">Parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="User_Guide.html#example-output">Example Output</a></li>
+<li class="toctree-l1"><a class="reference internal" href="User_Guide.html#example-problems">Example Problems</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="User_Guide.html#the-heat-equation">The Heat Equation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="User_Guide.html#the-gray-scott-model">The Gray-Scott model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="User_Guide.html#the-cahn-hilliard-equation">The Cahn-Hilliard equation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Gryphon documentation</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="gryphon_base.html"
+                        title="next chapter">gryphon_base</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/gryphon.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="gryphon_base.html" title="gryphon_base"
+             >next</a> |</li>
+        <li><a href="#">Gryphon v0.9.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Knut Erik Skare.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.1.
+    </div>
+  </body>
+</html>
