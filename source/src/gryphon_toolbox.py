@@ -24,12 +24,12 @@ import sys as s
 import time as time
 
 class gryphon_toolbox(object):
-	# -----------------------------------------------------------------
-	#
-	# 						CONSTRUCTOR
-	#
-	# -----------------------------------------------------------------
-	
+    # -----------------------------------------------------------------
+    #
+    # 						CONSTRUCTOR
+    #
+    # -----------------------------------------------------------------
+
     def __init__(self,T,u,f,bcs=[],tdf=[],tdfBC=[]):
         self.u = u                                        # Initial condition
         self.bcs = bcs                                    # Boundary conditions
@@ -72,53 +72,55 @@ class gryphon_toolbox(object):
         self.setupParameters()
         
     def setupParameters(self):
-		# Create parameter object
+        # Create parameter object
         self.parameters = d.Parameters("gryphon")
         self.parameters.add("verbose",False)
         self.parameters.add("drawplot",False)
-        self.plotcomponents = range(len(self.u.split()))
-        
-    
+        if(self.u.split() == ()):
+            self.plotcomponents = []
+        else:
+            self.plotcomponents = range(len(self.u.split()))
+
         # Parameter set "output" nested under "gryphon"
         self.parameters.add(d.Parameters("output"))
         self.parameters["output"].add("plot",False)
         self.parameters["output"].add("path","")
         self.parameters["output"].add("imgformat","png")
-        self.parameters["output"].set_range("imgformat",["png","jpg","eps"])
+        self.parameters["output"].set_range("imgformat", {"png", "jpg", "eps"})
         self.parameters["output"].add("reuseoutputfolder",False)
         self.parameters["output"].add("statistics",False)
         
         try:
-			self.parameters.add(d.Parameters("timestepping"))
-			self.parameters["timestepping"].add("dt",self.dt)
-			if self.supportsAdaptivity:
-				self.parameters["timestepping"].add("adaptive",True)
-				self.parameters["timestepping"].add("pessimistic_factor",self.pfactor)
-				self.parameters["timestepping"].add("absolute_tolerance",1e-7)
-				self.parameters["timestepping"].add("relative_tolerance",1e-6)
-				self.parameters["timestepping"].add("convergence_criterion","absolute")
-				self.parameters["timestepping"].add("dtmax",self.dtmax)
-				self.parameters["timestepping"].add("dtmin",self.dtmin)
+            self.parameters.add(d.Parameters("timestepping"))
+            self.parameters["timestepping"].add("dt",self.dt)
+            if self.supportsAdaptivity:
+                self.parameters["timestepping"].add("adaptive",True)
+                self.parameters["timestepping"].add("pessimistic_factor",self.pfactor)
+                self.parameters["timestepping"].add("absolute_tolerance",1e-7)
+                self.parameters["timestepping"].add("relative_tolerance",1e-6)
+                self.parameters["timestepping"].add("convergence_criterion","absolute")
+                self.parameters["timestepping"].add("dtmax",self.dtmax)
+                self.parameters["timestepping"].add("dtmin",self.dtmin)
 
-				# Set range for parameter-object
-				self.parameters["timestepping"].set_range("convergence_criterion",["relative","absolute"])
-				self.parameters["timestepping"].set_range("pessimistic_factor",0.0,1.0)
+                # Set range for parameter-object
+                self.parameters["timestepping"].set_range("convergence_criterion",{"relative","absolute"})
+                self.parameters["timestepping"].set_range("pessimistic_factor",0.0,1.0)
     
-				# Select default step size selector and populate choices.
-				self.parameters["timestepping"].add("stepsizeselector","gustafsson")
-				self.parameters["timestepping"].set_range("stepsizeselector",["gustafsson","standard"])
+                # Select default step size selector and populate choices.
+                self.parameters["timestepping"].add("stepsizeselector","gustafsson")
+                self.parameters["timestepping"].set_range("stepsizeselector",{"gustafsson","standard"})
         
-				# Dictionary which contains the step size selectors.
-				# Needed since the FEniCS parameters system can not store function handles
-				self.stepsizeselector = {"gustafsson":self.dtGustafsson,"standard":self.dtStandard}
+                # Dictionary which contains the step size selectors.
+                # Needed since the FEniCS parameters system can not store function handles
+                self.stepsizeselector = {"gustafsson":self.dtGustafsson,"standard":self.dtStandard}
         except Exception as E:
-			raise(E)
-										
+            raise(E)
+
     def setupSolver(self):
         if type(self.f) == type([]):
             self.n = len(self.f)
             if type(d.lhs(self.f[0]).integrals()[0].integrand()) == type(UFL.constantvalue.Zero()): # Not particularly elegant. Should check for another solution.
-				self.rank = 1
+                self.rank = 1
             else:
                 self.rank = 2
         else:
@@ -141,24 +143,24 @@ class gryphon_toolbox(object):
     def updateParameters(self):
         self.dt = self.parameters["timestepping"]["dt"]
         if(self.dt <= 0.0):
-			self.gryphonError("Unable to start time integration","Start step size is 0.0","Set \"parameters['timestepping']['dt']\" to something greater than zero.")
+            self.gryphonError("Unable to start time integration","Start step size is 0.0","Set \"parameters['timestepping']['dt']\" to something greater than zero.")
         self.DT.assign(self.dt)
         
         if self.supportsAdaptivity:
-			self.dtmax = self.parameters["timestepping"]["dtmax"]
-			self.dtmin = self.parameters["timestepping"]["dtmin"]
-			self.pfactor = self.parameters["timestepping"]["pessimistic_factor"]
+            self.dtmax = self.parameters["timestepping"]["dtmax"]
+            self.dtmin = self.parameters["timestepping"]["dtmin"]
+            self.pfactor = self.parameters["timestepping"]["pessimistic_factor"]
         
-			if self.parameters["timestepping"]["convergence_criterion"] == "relative":
-				self.tol = self.parameters["timestepping"]["relative_tolerance"]
-			elif self.parameters["timestepping"]["convergence_criterion"] == "absolute":
-				self.tol = self.parameters["timestepping"]["absolute_tolerance"]
+            if self.parameters["timestepping"]["convergence_criterion"] == "relative":
+                self.tol = self.parameters["timestepping"]["relative_tolerance"]
+            elif self.parameters["timestepping"]["convergence_criterion"] == "absolute":
+                self.tol = self.parameters["timestepping"]["absolute_tolerance"]
     
     def savePlot(self):
         try:
             import matplotlib.pyplot
         except ImportError:
-            print "Package 'matplotlib' not installed. Unable to save plot of selected step sizes."
+            print("Package 'matplotlib' not installed. Unable to save plot of selected step sizes.")
             return
 
         # Create figure object with scaled axis
@@ -198,7 +200,7 @@ class gryphon_toolbox(object):
         matplotlib.pyplot.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,
                              ncol=2, mode="expand", borderaxespad=0.,title="Step size selector: %s"%self.parameters["timestepping"]["stepsizeselector"])
         matplotlib.pyplot.savefig("%s/steps.%s"%(self.savepath,self.parameters["output"]["imgformat"]))
-        print "Plot of accepted time steps successfully written to '%s'." %(self.savepath)
+        print("Plot of accepted time steps successfully written to '%s'." %(self.savepath))
 
 
     def gryphonOutput(self,terminateReason):
@@ -246,8 +248,8 @@ class gryphon_toolbox(object):
             O += "  Mean step size:\t\t%g\n" % np.mean(self.accepted_steps)
             O += "  Variance in step sizes:\t%g\n" % np.var(self.accepted_steps)
         else:
-			O += "  Step size used (dt):\t\t%g\n" % self.dt
-			O += "  Steps used:\t\t\t%g\n" % self.nAcc
+            O += "  Step size used (dt):\t\t%g\n" % self.dt
+            O += "  Steps used:\t\t\t%g\n" % self.nAcc
 
         return O
     
@@ -262,19 +264,19 @@ class gryphon_toolbox(object):
             f.write("\\begin{tabular}{l|l}\hline\n")
             f.write("CPU/wall time & %g/%s \\\\ \n"%(self.cputime,timedelta(seconds=round(self.walltime))))
             if self.supportsAdaptivity:
-				f.write("No.accepted/rejected steps & %s (%s\\%%)/%s (%s\\%%) \\\\ \n"%(self.nAcc,pa,self.nRej,pr))
-				f.write("Convergence criterion & %s \\\\ \n"% self.parameters["timestepping"]["convergence_criterion"])
-				f.write("Absolute/relative tolerance & %g/%g \\\\ \n" %(self.parameters["timestepping"]["absolute_tolerance"],self.parameters["timestepping"]["relative_tolerance"]))
-				f.write("Pessimistic factor & %g \\\\ \n" % self.pfactor)
-				f.write("Step size selector & %s \\\\ \n" % self.parameters["timestepping"]["stepsizeselector"])
-				if not self.linear:
-					f.write("Function/Jacobian calls & %s/%s \\\\ \n" %(self.Feval,self.Jeval))
-				f.write("$t_{min} / t_{max}$ & %g/%g \\\\ \n" %(min(self.accepted_steps),max(self.accepted_steps)))
-				f.write("$t_{mean} / t_{var}$ & %g/%g \\\\ \hline \n" %(np.mean(self.accepted_steps),np.var(self.accepted_steps)))
+                f.write("No.accepted/rejected steps & %s (%s\\%%)/%s (%s\\%%) \\\\ \n"%(self.nAcc,pa,self.nRej,pr))
+                f.write("Convergence criterion & %s \\\\ \n"% self.parameters["timestepping"]["convergence_criterion"])
+                f.write("Absolute/relative tolerance & %g/%g \\\\ \n" %(self.parameters["timestepping"]["absolute_tolerance"],self.parameters["timestepping"]["relative_tolerance"]))
+                f.write("Pessimistic factor & %g \\\\ \n" % self.pfactor)
+                f.write("Step size selector & %s \\\\ \n" % self.parameters["timestepping"]["stepsizeselector"])
+                if not self.linear:
+                    f.write("Function/Jacobian calls & %s/%s \\\\ \n" %(self.Feval,self.Jeval))
+                f.write("$t_{min} / t_{max}$ & %g/%g \\\\ \n" %(min(self.accepted_steps),max(self.accepted_steps)))
+                f.write("$t_{mean} / t_{var}$ & %g/%g \\\\ \hline \n" %(np.mean(self.accepted_steps),np.var(self.accepted_steps)))
             else:
-				f.write(("Step size used & %s \\\\ \n") % self.dt)
-				f.write(("No. steps & %s \\\\ \n") % self.nAcc)
-				
+                f.write(("Step size used & %s \\\\ \n") % self.dt)
+                f.write(("No. steps & %s \\\\ \n") % self.nAcc)
+
             f.write("\end{tabular} \n")
             f.write("\caption{Results using %s on domain [%s,%s].} \n"%(self.parameters["method"],self.tstart,self.tend))
             f.write("\end{table} \n")
@@ -285,20 +287,20 @@ class gryphon_toolbox(object):
         f.write(self.gryphonOutput(terminateReason))
         f.close()
     
-        print "Job statistics file successfully written to '%s'." %(self.savepath)
+        print("Job statistics file successfully written to '%s'." %(self.savepath))
 
     def generateOutput(self,terminateReason):
         if terminateReason != "success":
-            print self.gryphonOutput(terminateReason)
+            print(self.gryphonOutput(terminateReason))
         elif self.parameters["verbose"]:
-            print self.gryphonOutput(terminateReason)
+            print(self.gryphonOutput(terminateReason))
         if self.parameters["output"]["statistics"]:
             self.saveStatistics(terminateReason)
             try:
-				if self.supportsAdaptivity and self.parameters["timestepping"]["adaptive"]:
-					self.savePlot()
+                if self.supportsAdaptivity and self.parameters["timestepping"]["adaptive"]:
+                    self.savePlot()
             except:
-				print ("** ERROR: Unable to save plot of selected step sizes.\n"
+                print ("** ERROR: Unable to save plot of selected step sizes.\n"
                        "          If you are running in an environment without graphics (i.e. on a computational server), be sure that matplotlib is using the 'Agg'-backend.\n"
                        "          You can set this by writing matplotlib.use('Agg')")
   
@@ -365,23 +367,23 @@ class gryphon_toolbox(object):
           - greater than remaining time domain
         """
         if self.supportsAdaptivity:
-			C1 = 1.5
-			C2 = 0.1
-			if self.parameters['timestepping']['adaptive']:
-				if self.dt > self.dtmax:
-					self.dt = self.dtmax
-					self.dt_restricted = True
-				elif self.dt_acc > 0.0 and self.dt > C1*self.dt_acc:
-					self.dt = C1*self.dt_acc
-					self.dt_restricted = True
-				elif self.dt_acc > 0.0 and self.dt < C2*self.dt_acc:
-					self.dt = C2*self.dt_acc
-					self.dt_restricted = True
-				elif self.dt < self.dtmin:
-					self.gryphonError("Unable to integrate system to user given tolerance tol = %g." % self.tol,
-								      "Minimum step size dt = %g selected." % self.dtmin)      
-				else:
-					self.dt_restricted = False
+            C1 = 1.5
+            C2 = 0.1
+            if self.parameters['timestepping']['adaptive']:
+                if self.dt > self.dtmax:
+                    self.dt = self.dtmax
+                    self.dt_restricted = True
+                elif self.dt_acc > 0.0 and self.dt > C1*self.dt_acc:
+                    self.dt = C1*self.dt_acc
+                    self.dt_restricted = True
+                elif self.dt_acc > 0.0 and self.dt < C2*self.dt_acc:
+                    self.dt = C2*self.dt_acc
+                    self.dt_restricted = True
+                elif self.dt < self.dtmin:
+                    self.gryphonError("Unable to integrate system to user given tolerance tol = %g." % self.tol,
+                                      "Minimum step size dt = %g selected." % self.dtmin)
+                else:
+                    self.dt_restricted = False
 
         if self.t + self.dt >= self.tend:
             self.dt = self.tend - self.t
@@ -422,7 +424,9 @@ class gryphon_toolbox(object):
         """
         if Init:
             if self.parameters['output']['plot']:
+                print(self.plotcomponents == [])
                 if self.plotcomponents == []:
+                    print('%s/plot/u_0.pvd' %self.savepath)
                     self.file = d.File('%s/plot/u_0.pvd' %self.savepath)
                     self.file << (self.u,float(self.t))
                 else:
@@ -447,17 +451,17 @@ class gryphon_toolbox(object):
                         self.plots[i].plot(self.u.split()[i])
                         
     def solve(self):
-		if self.parameters["output"]["statistics"] or self.parameters["output"]["plot"]:
-			self.verifyOutputPath()
-		self.cpustart = time.clock()
-		self.wallclockstart = time.time()
+        if self.parameters["output"]["statistics"] or self.parameters["output"]["plot"]:
+            self.verifyOutputPath()
+        self.cpustart = time.clock()
+        self.wallclockstart = time.time()
 
-		# Used when estimating program run time
-		self.timestepTimer = 0.0
-		self.updateParameters()
-		if self.supportsAdaptivity:
-			self.currentStepsizeSelector = self.stepsizeselector[self.parameters['timestepping']['stepsizeselector']]
-			
+        # Used when estimating program run time
+        self.timestepTimer = 0.0
+        self.updateParameters()
+        if self.supportsAdaptivity:
+            self.currentStepsizeSelector = self.stepsizeselector[self.parameters['timestepping']['stepsizeselector']]
+
     def terminateTimeLoop(self,terminateReason):
         self.cputime = time.clock() - self.cpustart
         self.walltime = time.time() - self.wallclockstart
@@ -477,58 +481,58 @@ class gryphon_toolbox(object):
         raise RuntimeError(EM)
             
     def verifyOutputPath(self):
-		path = self.parameters['output']['path']
-		cwd = getcwd()
-		
-		if path == "":
-			path = s.argv[0].replace(".py","") + "_gryphon_data"
-		
-		try:
-			if path[0] == "/":
-				# Absolute path
-				self.savepath = path
-			else:
-				# Relative path
-				self.savepath = getcwd() + "/" + path
-				
-			makedirs(self.savepath)
-		except OSError as E:
-			if E.errno == 13:
-				self.gryphonError(
-					str(E),
-					"User running script has insuficient access to specified path.",
-					remedy="Change output folder to a folder you know you own.")
-			elif E.errno == 17:
-				# Folder already exists, ask user if it is OK to reuse
-				if self.parameters["output"]["reuseoutputfolder"]:
-					# It is OK to reuse the savepath. Just pass.
-					pass
-				else:
-					userResponse = False
-					while not userResponse:
-						print "!! WARNING: The folder '" + self.savepath + "' already exists.\nPress Y and ENTER to reuse folder (FILES MIGHT BE OVERWRITTEN!!). Press N and ENTER to exit."
-						print "To always reuse the folder, set the option 'parameters['output']['reuseoutputfolder'] = True'"
-						userinput = raw_input('Y/N: ')
-						if userinput.upper() == 'N':
-							s.exit(0)
-						elif userinput.upper() == 'Y':
-							userResponse = True
-			else:
-				raise(E)
-			
-		# Do a final test to check whether a file can be created in the
-		# desired folder.
-		try:
-			finaltest = open(self.savepath + "/" + ".gryphonwritetest","w")
-			finaltest.close()
-		except IOError as E:
-			if E.errno == 13:
-				self.gryphonError(
-					"Unable to write to folder '" + self.savepath + "'",
-					"User running script has insuficient access to specified path.",
-					remedy="Change output folder to a folder you know you own.")
-			else:
-				raise(E)				
+        path = self.parameters['output']['path']
+        cwd = getcwd()
+
+        if path == "":
+            path = s.argv[0].replace(".py","") + "_gryphon_data"
+
+        try:
+            if path[0] == "/":
+                # Absolute path
+                self.savepath = path
+            else:
+                # Relative path
+                self.savepath = getcwd() + "/" + path
+
+            makedirs(self.savepath)
+        except OSError as E:
+            if E.errno == 13:
+                self.gryphonError(
+                    str(E),
+                    "User running script has insuficient access to specified path.",
+                    remedy="Change output folder to a folder you know you own.")
+            elif E.errno == 17:
+                # Folder already exists, ask user if it is OK to reuse
+                if self.parameters["output"]["reuseoutputfolder"]:
+                    # It is OK to reuse the savepath. Just pass.
+                    pass
+                else:
+                    userResponse = False
+                    while not userResponse:
+                        print("!! WARNING: The folder '" + self.savepath + "' already exists.\nPress Y and ENTER to reuse folder (FILES MIGHT BE OVERWRITTEN!!). Press N and ENTER to exit.")
+                        print("To always reuse the folder, set the option 'parameters['output']['reuseoutputfolder'] = True'")
+                        userinput = input('Y/N: ')
+                        if userinput.upper() == 'N':
+                            s.exit(0)
+                        elif userinput.upper() == 'Y':
+                            userResponse = True
+            else:
+                raise(E)
+
+        # Do a final test to check whether a file can be created in the
+        # desired folder.
+        try:
+            finaltest = open(self.savepath + "/" + ".gryphonwritetest","w")
+            finaltest.close()
+        except IOError as E:
+            if E.errno == 13:
+                self.gryphonError(
+                    "Unable to write to folder '" + self.savepath + "'",
+                    "User running script has insuficient access to specified path.",
+                    remedy="Change output folder to a folder you know you own.")
+            else:
+                raise(E)
     
     def printProgress(self,timeEstimate=False,rejectedStep=False):
         n = 20    # Width of progress bar
@@ -544,7 +548,7 @@ class gryphon_toolbox(object):
         if timeEstimate and (self.tstart+self.t)/(self.tend-self.tstart) > 0.01 and not rejectedStep:
             progressBar += "Completion in ~ %s" %(timeEstimate())
     
-        print progressBar
+        print(progressBar)
   
     def verifyInput(self):
         if type(self.T) != list:

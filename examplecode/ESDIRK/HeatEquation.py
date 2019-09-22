@@ -26,7 +26,7 @@ v = TestFunction(V)
 
 # Define diffusion coefficient and source inside domain
 D = Constant(0.1)
-domainSource = Expression("10*sin(pi/2*t)*exp(-((x[0]-0.7)*(x[0]-0.7) + (x[1]-0.5)*(x[1]-0.5))/0.01)",t=0)
+domainSource = Expression("10*sin(pi/2*t)*exp(-((x[0]-0.7)*(x[0]-0.7) + (x[1]-0.5)*(x[1]-0.5))/0.01)",t=0, degree=1)
 
 # Define right hand side of the problem
 rhs = -D*inner(grad(u),grad(v))*dx + domainSource*v*dx
@@ -42,7 +42,7 @@ def boundaryLeft(x,on_boundary):
 def boundaryRight(x,on_boundary):
   return 1.0 - x[0] < DOLFIN_EPS
 
-boundarySource = Expression("t",t=0)
+boundarySource = Expression("t",t=0, degree=1)
 bcLeft  = DirichletBC(V,boundarySource,boundaryLeft)
 bcRight = DirichletBC(V,0.0,boundaryRight)
 

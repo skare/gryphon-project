@@ -24,7 +24,7 @@ from datetime import timedelta
 
 class backwardEuler(gryphon_toolbox):
     def __init__(self,T,u,f,g=[],bcs=[],tdf=[],tdfBC=[]):
-		# The current backward Euler implementation does not provide
+        # The current backward Euler implementation does not provide
         # an estimate for the local error and does thus not support
         # adaptive step size selection.
         self.supportsAdaptivity = False
@@ -57,11 +57,11 @@ class backwardEuler(gryphon_toolbox):
             # Add differential equations
             L = [reduce((lambda x,y:x+y),[self.U[alpha]*self.Q[alpha]*d.dx - self.u[alpha]*self.Q[alpha]*d.dx for alpha in range(self.n)])]
             for alpha in range(0,self.n):
-				R = {}
-				for k in range(0,len(self.tdf)):
-					R[self.tdf[k]] = self.tdfButcher[k][0]
-					
-				L[0] -= self.DT*d.replace(self.f[alpha],R)
+                R = {}
+                for k in range(0,len(self.tdf)):
+                    R[self.tdf[k]] = self.tdfButcher[k][0]
+
+                L[0] -= self.DT*d.replace(self.f[alpha],R)
         return L
 
     def getNonlinearVariationalForms(self,X):

@@ -16,18 +16,19 @@
 # along with Gryphon. If not, see <http://www.gnu.org/licenses/>.
 
 from dolfin import Function,dx,action,lhs,rhs,NonlinearProblem
-from dolfin import assemble,norm,derivative,replace,Expression
-from ufl import form
+from dolfin import assemble,norm,derivative,Expression
+from ufl import form,replace
 from ESDIRK_tables import getTable
 from gryphon_toolbox import gryphon_toolbox, linearStage, nonlinearStage
 from datetime import timedelta
+from functools import reduce
 import time
 import numpy as np
 
 
 class ESDIRK(gryphon_toolbox):
     def __init__(self,T,u,f,g=[],bcs=[],tdf=[],tdfBC=[]):
-		# The ESDIRK methods provides an estimate for the local error
+        # The ESDIRK methods provides an estimate for the local error
         # and thus supports adaptive step size selection.
         self.supportsAdaptivity = True
         
@@ -35,7 +36,7 @@ class ESDIRK(gryphon_toolbox):
         gryphon_toolbox.__init__(self,T,u,f,bcs,tdf,tdfBC)
         
         self.parameters.add("method","ESDIRK43a")
-        self.parameters.set_range("method",["ESDIRK43a","ESDIRK43b","ESDIRK32a","ESDIRK32b"])
+        self.parameters.set_range("method",{"ESDIRK43a","ESDIRK43b","ESDIRK32a","ESDIRK32b"})
         self.parameters['timestepping'].add("inconsistent_initialdata",False)
         
         # Do input verification on any algebraic components.
@@ -59,7 +60,8 @@ class ESDIRK(gryphon_toolbox):
                 if self.tdf[j].__class__.__name__ == "CompiledExpression":
                     self.tdfButcher[j].append(Expression(self.tdf[j].cppcode,t=self.tstart))
                 else:
-                    self.tdfButcher[j].append(self.tdf[j].__class__())
+                    self.tdfButcher[j].append(self.tdf[j])
+                    # self.tdfButcher[j].append(self.tdf[j].__class__())
       
         if self.n == 1:
             # Add differential equation
@@ -150,7 +152,7 @@ class ESDIRK(gryphon_toolbox):
         s = B['tableau'].shape[0]
 
         # Array for storing the stage values
-        X  = [Function(self.u) for i in range(s)]
+        X  = [self.u.copy(deepcopy=True) for i in range(s)]
 
         # Get the variational linear/nonlinear variational forms
         # and embed them in respective solver class
