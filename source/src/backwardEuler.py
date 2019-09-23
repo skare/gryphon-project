@@ -17,13 +17,16 @@
 
 import time as time
 from datetime import timedelta
+from functools import reduce
 
 import dolfin as d
+import ufl as ufl
+
 from .gryphon_toolbox import gryphon_toolbox, linearStage, nonlinearStage
 
 
 class backwardEuler(gryphon_toolbox):
-    def __init__(self, T, u, f, g=[], bcs=[], tdf=[], tdfBC=[]):
+    def __init__(self, T, u, f, bcs=[], tdf=[], tdfBC=[]):
         # The current backward Euler implementation does not provide
         # an estimate for the local error and does thus not support
         # adaptive step size selection.
@@ -33,7 +36,7 @@ class backwardEuler(gryphon_toolbox):
         gryphon_toolbox.__init__(self, T, u, f, bcs, tdf, tdfBC)
 
         self.parameters.add("method", "Backward Euler")
-        self.parameters.set_range("method", ["Backward Euler"])
+        self.parameters.set_range("method", {"Backward Euler"})
 
     def getLinearVariationalForms(self, X):
         # Generate copies of time dependent functions
@@ -42,7 +45,7 @@ class backwardEuler(gryphon_toolbox):
             if self.tdf[j].__class__.__name__ == "CompiledExpression":
                 self.tdfButcher[j].append(d.Expression(self.tdf[j].cppcode, t=self.tstart))
             else:
-                self.tdfButcher[j].append(self.tdf[j].__class__())
+                self.tdfButcher[j].append(self.tdf[j])
 
         if self.n == 1:
             # Add differential equation
@@ -51,7 +54,7 @@ class backwardEuler(gryphon_toolbox):
             for k in range(0, len(self.tdf)):
                 R[self.tdf[k]] = self.tdfButcher[k][0]
 
-            L[0] -= self.DT * d.replace(self.f[0], R)
+            L[0] -= self.DT * ufl.replace(self.f[0], R)
 
         else:
             # Add differential equations
@@ -63,7 +66,7 @@ class backwardEuler(gryphon_toolbox):
                 for k in range(0, len(self.tdf)):
                     R[self.tdf[k]] = self.tdfButcher[k][0]
 
-                L[0] -= self.DT * d.replace(self.f[alpha], R)
+                L[0] -= self.DT * ufl.replace(self.f[alpha], R)
         return L
 
     def getNonlinearVariationalForms(self, X):
@@ -73,7 +76,7 @@ class backwardEuler(gryphon_toolbox):
             if self.tdf[j].__class__.__name__ == "CompiledExpression":
                 self.tdfButcher[j].append(d.Expression(self.tdf[j].cppcode, t=self.tstart))
             else:
-                self.tdfButcher[j].append(self.tdf[j].__class__())
+                self.tdfButcher[j].append(self.tdf[j])
 
         if self.n == 1:
             # Add differential equations
@@ -91,14 +94,14 @@ class backwardEuler(gryphon_toolbox):
                 replaceDict = {self.u: X[0]}
                 for k in range(len(self.tdf)):
                     replaceDict[self.tdf[k]] = self.tdfButcher[k][j]
-                L[0] -= self.DT * d.replace(self.f[alpha], replaceDict)
+                L[0] -= self.DT * ufl.replace(self.f[alpha], replaceDict)
         return L
 
     def solve(self):
         super(backwardEuler, self).solve()
 
         # Array for storing the stage values
-        X = [d.Function(self.u)]
+        X = [self.u.copy(deepcopy=True)]
 
         # Get the variational linear/nonlinear variational forms
         # and embed them in respective solver class

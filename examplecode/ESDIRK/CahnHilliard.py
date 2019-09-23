@@ -15,44 +15,49 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Gryphon. If not, see <http://www.gnu.org/licenses/>.
 
-from gryphon import ESDIRK
-from dolfin import *
 import random
 
+from dolfin import *
+from gryphon import ESDIRK
+
+
 # Initial conditions
-class InitialConditions(Expression):
-  def __init__(self):
-      random.seed(2 + MPI.process_number())
-  def eval(self, values, x):
-      values[0] = 0.63 + 0.02*(0.5 - random.random())
-      values[1] = 0.0
-  def value_shape(self):
-      return (2,)
+class InitialConditions(UserExpression):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        random.seed(3.14)
+
+    def eval(self, values, x):
+        values[0] = 0.63 + 0.02 * (0.5 - random.random())
+        values[1] = 0.0
+
+    def value_shape(self):
+        return (2,)
+
 
 # Create mesh and define function spaces
 mesh = UnitSquareMesh(49, 49)
-V = FunctionSpace(mesh, "Lagrange", 1)
-ME = V*V
-
-q,v = TestFunctions(ME)
+P1 = FiniteElement("Lagrange", mesh.ufl_cell(), 1)
+ME = FunctionSpace(mesh, P1 * P1)
+q, v = TestFunctions(ME)
 
 # Define and interpolate initial condition
-u   = Function(ME)
+u = Function(ME)
 u.interpolate(InitialConditions())
 
-c,mu = split(u)
+c, mu = split(u)
 c = variable(c)
-f    = 100*c**2*(1-c)**2
+f = 100 * c ** 2 * (1 - c) ** 2
 dfdc = diff(f, c)
-lmbda  = Constant(1.0e-02)
+lmbda = Constant(1.0e-02)
 
 # Weak statement of the equations
-f = -inner(grad(mu), grad(q))*dx
-g = mu*v*dx - dfdc*v*dx - lmbda*inner(grad(c), grad(v))*dx
+f = -inner(grad(mu), grad(q)) * dx
+g = mu * v * dx - dfdc * v * dx - lmbda * inner(grad(c), grad(v)) * dx
 
-T = [0,5e-5] # Time domain
+T = [0, 5e-5]  # Time domain
 
-myobj = ESDIRK(T,u,f,g=g)
+myobj = ESDIRK(T, u, f, g=g)
 myobj.parameters['timestepping']['absolute_tolerance'] = 1e-2
 myobj.parameters['timestepping']['inconsistent_initialdata'] = True
 myobj.parameters['verbose'] = True
@@ -60,7 +65,7 @@ myobj.parameters['drawplot'] = True
 myobj.parameters['output']['statistics'] = True
 
 # Suppress some FEniCS output
-set_log_level(WARNING)
+set_log_level(LogLevel.WARNING)
 
 # Solve the problem
 myobj.solve()

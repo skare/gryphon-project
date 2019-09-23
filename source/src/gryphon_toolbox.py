@@ -21,6 +21,7 @@ from datetime import timedelta
 from os import getcwd, makedirs
 
 import dolfin as d
+import matplotlib.pyplot as plt
 import numpy as np
 import ufl as UFL
 
@@ -248,9 +249,9 @@ class gryphon_toolbox(object):
             O += "  Absolute tolerance:\t\t%g\n" % self.parameters["timestepping"]["absolute_tolerance"]
             O += "  Relative tolerance:\t\t%g\n" % self.parameters["timestepping"]["relative_tolerance"]
             O += "  Number of steps accepted:\t%s (%g%%)\n" % (
-            self.nAcc, round(100.0 * self.nAcc / (self.nAcc + self.nRej), 2))
+                self.nAcc, round(100.0 * self.nAcc / (self.nAcc + self.nRej), 2))
             O += "  Number of steps rejected:\t%s (%g%%)\n" % (
-            self.nRej, round(100.0 * self.nRej / (self.nAcc + self.nRej), 2))
+                self.nRej, round(100.0 * self.nRej / (self.nAcc + self.nRej), 2))
             O += "  Maximum step size selected:\t%g\n" % max(self.accepted_steps)
             O += "  Minimum step size selected:\t%g\n" % min(self.accepted_steps)
             O += "  Mean step size:\t\t%g\n" % np.mean(self.accepted_steps)
@@ -275,22 +276,22 @@ class gryphon_toolbox(object):
                 f.write("No.accepted/rejected steps & %s (%s\\%%)/%s (%s\\%%) \\\\ \n" % (self.nAcc, pa, self.nRej, pr))
                 f.write("Convergence criterion & %s \\\\ \n" % self.parameters["timestepping"]["convergence_criterion"])
                 f.write("Absolute/relative tolerance & %g/%g \\\\ \n" % (
-                self.parameters["timestepping"]["absolute_tolerance"],
-                self.parameters["timestepping"]["relative_tolerance"]))
+                    self.parameters["timestepping"]["absolute_tolerance"],
+                    self.parameters["timestepping"]["relative_tolerance"]))
                 f.write("Pessimistic factor & %g \\\\ \n" % self.pfactor)
                 f.write("Step size selector & %s \\\\ \n" % self.parameters["timestepping"]["stepsizeselector"])
                 if not self.linear:
                     f.write("Function/Jacobian calls & %s/%s \\\\ \n" % (self.Feval, self.Jeval))
                 f.write("$t_{min} / t_{max}$ & %g/%g \\\\ \n" % (min(self.accepted_steps), max(self.accepted_steps)))
                 f.write("$t_{mean} / t_{var}$ & %g/%g \\\\ \hline \n" % (
-                np.mean(self.accepted_steps), np.var(self.accepted_steps)))
+                    np.mean(self.accepted_steps), np.var(self.accepted_steps)))
             else:
                 f.write(("Step size used & %s \\\\ \n") % self.dt)
                 f.write(("No. steps & %s \\\\ \n") % self.nAcc)
 
             f.write("\end{tabular} \n")
             f.write("\caption{Results using %s on domain [%s,%s].} \n" % (
-            self.parameters["method"], self.tstart, self.tend))
+                self.parameters["method"], self.tstart, self.tend))
             f.write("\end{table} \n")
             f.close()
 
@@ -435,9 +436,7 @@ class gryphon_toolbox(object):
         """
         if Init:
             if self.parameters['output']['plot']:
-                print(self.plotcomponents == [])
                 if self.plotcomponents == []:
-                    print('%s/plot/u_0.pvd' % self.savepath)
                     self.file = d.File('%s/plot/u_0.pvd' % self.savepath)
                     self.file << (self.u, float(self.t))
                 else:
@@ -445,7 +444,7 @@ class gryphon_toolbox(object):
                     for i in self.plotcomponents:
                         self.file[i] << (self.u.split()[i], float(self.t))
             if self.parameters['drawplot']:
-                self.plots = [d.plot(d.split(self.u)[i], interactive=False, rescale=True) for i in range(self.n)]
+                self.plots = [plt.figure() for i in range(self.n)]
 
         if Update:
             if self.parameters['output']['plot']:
@@ -456,10 +455,18 @@ class gryphon_toolbox(object):
                         self.file[i] << (self.u.split()[i], float(self.t))
             if self.parameters['drawplot']:
                 if self.plotcomponents == []:
-                    self.plots[0].plot(self.u)
+                    plt.figure(1)
+                    plt.cla()
+                    d.plot(self.u)
+                    plt.ion()
+                    plt.pause(0.001)
                 else:
-                    for i in self.plotcomponents:
-                        self.plots[i].plot(self.u.split()[i])
+                    for figureCounter in range(0, self.n):
+                        plt.figure(figureCounter + 1) # Must start with figure 1, not figure 0
+                        plt.cla()
+                        d.plot(self.u.split()[figureCounter])
+                        plt.ion()
+                        plt.pause(0.001)
 
     def solve(self):
         if self.parameters["output"]["statistics"] or self.parameters["output"]["plot"]:
@@ -554,7 +561,7 @@ class gryphon_toolbox(object):
         dots = int(round(n * progress / 100.0))
 
         progressBar = "|" + "=" * dots + ">" + "." * (n - dots) + "| " + (str(progress) + " %").ljust(7) + (
-                    " t=%g" % (self.t)).ljust(15)
+                " t=%g" % (self.t)).ljust(15)
         if rejectedStep:
             progressBar += "Step rejected, dt=%g" % self.dt
 

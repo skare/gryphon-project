@@ -39,65 +39,66 @@ from gryphon import ESDIRK
 def set_output_dir():
     return u"./Results/_" + datetime.today().strftime('%y_%m_%d %H_%M')
 
-class InitialConditions(Expression):
+
+class InitialConditions(UserExpression):
     def eval(self, values, x):
-        values[1] = 0   
-        if between(x[2],(0.0,0.25)):
-          values[0] = 1 
+        values[1] = 0
+        if between(x[2], (0.0, 0.25)):
+            values[0] = 1
         else:
-          values[0] = 0
-         
+            values[0] = 0
+
     def value_shape(self):
         return (2,)
+
 
 if __name__ == "__main__":
     output_dir = str(set_output_dir())
     
-    mesh = BoxMesh(0, 1, 0, 1, 0, 4, 2, 2, 8)
-    
-    V = FunctionSpace(mesh, "Lagrange", 1)
-    ME = V*V
-    q1,q2 = TestFunctions(ME)
-    
+    mesh = BoxMesh(Point(0, 1, 0), Point(1, 0, 4), 2, 2, 8)
+
+    P1 = FiniteElement("Lagrange", mesh.ufl_cell(), 1)
+    ME = FunctionSpace(mesh, P1 * P1)
+    q1, q2 = TestFunctions(ME)
+
     # Define and interpolate initial condition
     W = Function(ME)
     W.interpolate(InitialConditions())
-    phi,r = split(W)
-    
-    #Set parameters of the model
-    beta_t = 13 #ms, conversion factor
-    beta_phi = Constant(100) # mV, conversion factor
-    delta_phi = Constant(-80) # mV, potencial difference
-    d_along_dimensional  = 0.3    #mm^2/ms, diffusion coefficient along a fiber  
-    d_across_dimensional = 0.033  #mm^2/ms, diffusion coefficient across a fiber   
-    d_along  = d_along_dimensional*beta_t
-    d_across = d_across_dimensional*beta_t
-    alpha  = Constant(0.01)
-    b   = Constant(0.15)
-    c   = Constant(8)
+    phi, r = split(W)
+
+    # Set parameters of the model
+    beta_t = 13  # ms, conversion factor
+    beta_phi = Constant(100)  # mV, conversion factor
+    delta_phi = Constant(-80)  # mV, potencial difference
+    d_along_dimensional = 0.3  # mm^2/ms, diffusion coefficient along a fiber
+    d_across_dimensional = 0.033  # mm^2/ms, diffusion coefficient across a fiber
+    d_along = d_along_dimensional * beta_t
+    d_across = d_across_dimensional * beta_t
+    alpha = Constant(0.01)
+    b = Constant(0.15)
+    c = Constant(8)
     gamma = Constant(0.002)
     mu_1 = Constant(0.2)
     mu_2 = Constant(0.3)
-    
+
     # Define the time domain
-    T = [0,1]
-    
+    T = [0, 1]
+
     # Create mesh functions for coefficients of a diffusion tensor
     d00 = MeshFunction("double", mesh, 3)
     d11 = MeshFunction("double", mesh, 3)
     d22 = MeshFunction("double", mesh, 3)
-    
-    #numpy.outer(fiber_v, fiber_v)
-    #assume that fiber is directed along Oz
+
+    # numpy.outer(fiber_v, fiber_v)
+    # assume that fiber is directed along Oz
     # Iterate over mesh and set values
     for cell in cells(mesh):
-            d00[cell] = d_across
-            d11[cell] = d_across
-            d22[cell] = d_along
-    
+        d00[cell] = d_across
+        d11[cell] = d_across
+        d22[cell] = d_along
+
     # Code for C++ evaluation of conductivity
-    DiffusionTensor_code  = """
-    
+    DiffusionTensor_code = '''
     class DiffusionTensor : public Expression
     {
     public:
@@ -120,23 +121,22 @@ if __name__ == "__main__":
       std::shared_ptr<MeshFunction<double> > d11;
       std::shared_ptr<MeshFunction<double> > d22;
     
-    };
-    """
-    
-    d_temp = Expression(cppcode=DiffusionTensor_code )
+    };'''
+
+    d_temp = Expression(cppcode=DiffusionTensor_code)
     d_temp.d00 = d00
     d_temp.d11 = d11
     d_temp.d22 = d22
     D = as_matrix(((d_temp[0], 0, 0), (0, d_temp[1], 0), (0, 0, d_temp[2])))
-    
+
     # Define the right hand side for each of the PDEs
-    F1 = (-inner(D*grad(phi),grad(q1)) + c*phi*(phi - alpha)*(1 - phi)*q1 - r*phi*q1)*dx
-    F2 = (gamma + r*mu_1/(mu_2 + phi))*(-r- c*phi*(phi-b-1))*q2*dx  
-    
+    F1 = (-inner(D * grad(phi), grad(q1)) + c * phi * (phi - alpha) * (1 - phi) * q1 - r * phi * q1) * dx
+    F2 = (gamma + r * mu_1 / (mu_2 + phi)) * (-r - c * phi * (phi - b - 1)) * q2 * dx
+
     # Create the solver object and adjust tolerance
-    obj = ESDIRK(T,W,[F1,F2])
+    obj = ESDIRK(T, W, [F1, F2])
     obj.parameters["timestepping"]["absolute_tolerance"] = 1e-3
-    
+
     # Turn on some output and save run time
     obj.parameters["verbose"] = True
     obj.parameters["drawplot"] = False
@@ -144,9 +144,9 @@ if __name__ == "__main__":
     obj.parameters["output"]["path"] = output_dir
     obj.parameters["output"]["statistics"] = True
     obj.parameters["output"]["plot"] = True
-    
+
     # Supress some FEniCS output
-    set_log_level(WARNING)
-    
+    set_log_level(LogLevel.WARNING)
+
     # Solve the problem
     obj.solve()

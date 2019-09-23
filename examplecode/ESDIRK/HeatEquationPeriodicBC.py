@@ -18,14 +18,15 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Gryphon. If not, see <http://www.gnu.org/licenses/>.
 
-from gryphon import ESDIRK
 from dolfin import *
+from gryphon import ESDIRK
 
 
 # Sub domain for Dirichlet boundary condition
 class DirichletBoundary(SubDomain):
     def inside(self, x, on_boundary):
         return bool((x[1] < DOLFIN_EPS or x[1] > (1.0 - DOLFIN_EPS)) and on_boundary)
+
 
 # Sub domain for Periodic boundary condition
 class PeriodicBoundary(SubDomain):
@@ -39,11 +40,12 @@ class PeriodicBoundary(SubDomain):
         y[0] = x[0] - 1.0
         y[1] = x[1]
 
+
 # Create periodic boundary condition
 pbc = PeriodicBoundary()
 
 # Define spatial mesh, function space, trial/test functions
-mesh = UnitSquareMesh(39,39)
+mesh = UnitSquareMesh(39, 39)
 V = FunctionSpace(mesh, "CG", 1, constrained_domain=PeriodicBoundary())
 
 u = TrialFunction(V)
@@ -51,24 +53,23 @@ v = TestFunction(V)
 
 # Define diffusion coefficient and source inside domain
 D = Constant(0.1)
-domainSource = Expression("10*sin(pi/2*t)*exp(-((x[0]-1.0)*(x[0]-1.0) + (x[1]-0.5)*(x[1]-0.5))/0.01)",t=0)
+domainSource = Expression("10*sin(pi/2*t)*exp(-((x[0]-1.0)*(x[0]-1.0) + (x[1]-0.5)*(x[1]-0.5))/0.01)", t=0, degree=1)
 
 # Define right hand side of the problem
-rhs = -D*inner(grad(u),grad(v))*dx + domainSource*v*dx
-
+rhs = -D * inner(grad(u), grad(v)) * dx + domainSource * v * dx
 
 # Definie initial condition
 W = Function(V)
 W.interpolate(Constant(0.0))
 
-boundarySource = Expression("0.0")
-bcDirichlet  = DirichletBC(V,boundarySource,DirichletBoundary())
+boundarySource = Expression("0.0", degree=1)
+bcDirichlet = DirichletBC(V, boundarySource, DirichletBoundary())
 
 # Define the time domain
-T = [0,1]
+T = [0, 1]
 
 # Create the ESDIRK object
-obj = ESDIRK(T,W,rhs,bcs=[bcDirichlet],tdf=[domainSource])
+obj = ESDIRK(T, W, rhs, bcs=[bcDirichlet], tdf=[domainSource])
 
 # Turn on extra terminal output
 obj.parameters["verbose"] = True

@@ -64,10 +64,10 @@ obj.parameters["timestepping"]["absolute_tolerance"] = 1e-3
 # Turn on some output and save run time
 # statistics to sub folder "GrayScott"
 obj.parameters["verbose"] = True
-obj.parameters["drawplot"] = False  # Drawplot seems to be pretty broken, do not set to True
+obj.parameters["drawplot"] = True  # Drawplot seems to be pretty broken, do not set to True
 obj.parameters["output"]["path"] = "GrayScott"
 obj.parameters["output"]["statistics"] = True
-obj.parameters["output"]["plot"] = True
+obj.parameters["output"]["plot"] = False
 
 # Supress some FEniCS output
 set_log_level(LogLevel.WARNING)

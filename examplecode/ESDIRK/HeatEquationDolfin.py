@@ -15,24 +15,24 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Gryphon. If not, see <http://www.gnu.org/licenses/>.
 
-from gryphon import ESDIRK
 from dolfin import *
+from gryphon import ESDIRK
 
 # Define spatial mesh, function space, trial/test functions
 # TODO: Insert ref to mesh source.
 mesh = Mesh("meshes/dolfin_fine.xml.gz")
 sub_domains = MeshFunction("size_t", mesh, "meshes/dolfin_fine_subdomains.xml.gz")
 
-V = FunctionSpace(mesh,"CG",1)
+V = FunctionSpace(mesh, "CG", 1)
 u = TrialFunction(V)
 v = TestFunction(V)
 
 # Define diffusion coefficient and source inside domain
-D = Expression('sin(t*pi)',t=0)
+D = Expression('sin(t*pi)', t=0, degree=1)
 bc0 = DirichletBC(V, D, sub_domains, 0)
 
 # Define right hand side of the problem
-rhs = -Constant(0.1)*inner(grad(u),grad(v))*dx
+rhs = -Constant(0.1) * inner(grad(u), grad(v)) * dx
 
 # Definie initial condition
 W = Function(V)
@@ -40,19 +40,19 @@ W.interpolate(Constant(0.0))
 
 # Inflow boundary condition for velocity
 # x0 = 1
-inflow = Expression('-t',t=0)
+inflow = Expression('-t', t=0, degree=1)
 bc1 = DirichletBC(V, inflow, sub_domains, 1)
 
 # Boundary condition for pressure at outflow
 # x0 = 0
-zero = Expression('t',t=0)
+zero = Expression('t', t=0, degree=1)
 bc2 = DirichletBC(V, zero, sub_domains, 2)
 
 # Define the time domain.
-T = [0.0,5.0]
+T = [0.0, 5.0]
 
 # Create the ESDIRK object.
-obj = ESDIRK(T,W,rhs,bcs=[bc0, bc1, bc2],tdfBC=[D,inflow,zero])
+obj = ESDIRK(T, W, rhs, bcs=[bc0, bc1, bc2], tdfBC=[D, inflow, zero])
 
 # Turn on extra terminal output
 obj.parameters["verbose"] = True

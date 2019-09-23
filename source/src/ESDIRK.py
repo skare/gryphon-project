@@ -61,7 +61,6 @@ class ESDIRK(gryphon_toolbox):
                     self.tdfButcher[j].append(Expression(self.tdf[j].cppcode, t=self.tstart))
                 else:
                     self.tdfButcher[j].append(self.tdf[j])
-                    # self.tdfButcher[j].append(self.tdf[j].__class__())
 
         if self.n == 1:
             # Add differential equation
@@ -115,7 +114,7 @@ class ESDIRK(gryphon_toolbox):
                 if self.tdf[j].__class__.__name__ == "CompiledExpression":
                     self.tdfButcher[j].append(Expression(self.tdf[j].cppcode, t=self.tstart))
                 else:
-                    self.tdfButcher[j].append(self.tdf[j].__class__())
+                    self.tdfButcher[j].append(self.tdf[j])
 
         if self.n == 1:
             # Add differential equations
