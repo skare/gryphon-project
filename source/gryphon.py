@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2014 - Knut Erik Skare
+# Copyright (C) 2012-2019 - Knut Erik Skare
 #
 # This file is part of Gryphon.
 #

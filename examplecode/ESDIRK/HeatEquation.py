@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2014 - Knut Erik Skare
+# Copyright (C) 2012-2019 - Knut Erik Skare
 #
 # This file shows an example of the usage of Gryphon.
 #
@@ -15,42 +15,46 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Gryphon. If not, see <http://www.gnu.org/licenses/>.
 
+from dolfin import UnitSquareMesh, FunctionSpace, TrialFunction, TestFunction, Constant, Expression, inner, grad, dx, \
+  Function, DOLFIN_EPS, DirichletBC
 from gryphon import ESDIRK
-from dolfin import *
 
 # Define spatial mesh, function space, trial/test functions
-mesh = UnitSquareMesh(29,29)
-V = FunctionSpace(mesh,"Lagrange",1)
+mesh = UnitSquareMesh(29, 29)
+V = FunctionSpace(mesh, "Lagrange", 1)
 u = TrialFunction(V)
 v = TestFunction(V)
 
 # Define diffusion coefficient and source inside domain
 D = Constant(0.1)
-domainSource = Expression("10*sin(pi/2*t)*exp(-((x[0]-0.7)*(x[0]-0.7) + (x[1]-0.5)*(x[1]-0.5))/0.01)",t=0, degree=1)
+domainSource = Expression("10*sin(pi/2*t)*exp(-((x[0]-0.7)*(x[0]-0.7) + (x[1]-0.5)*(x[1]-0.5))/0.01)", t=0, degree=1)
 
 # Define right hand side of the problem
-rhs = -D*inner(grad(u),grad(v))*dx + domainSource*v*dx
+rhs = -D * inner(grad(u), grad(v)) * dx + domainSource * v * dx
 
 # Definie initial condition
 W = Function(V)
 W.interpolate(Constant(0.0))
 
+
 # Define left and right boundary
-def boundaryLeft(x,on_boundary):
-  return x[0] < DOLFIN_EPS
+def boundaryLeft(x, on_boundary):
+    return x[0] < DOLFIN_EPS
 
-def boundaryRight(x,on_boundary):
-  return 1.0 - x[0] < DOLFIN_EPS
 
-boundarySource = Expression("t",t=0, degree=1)
-bcLeft  = DirichletBC(V,boundarySource,boundaryLeft)
-bcRight = DirichletBC(V,0.0,boundaryRight)
+def boundaryRight(x, on_boundary):
+    return 1.0 - x[0] < DOLFIN_EPS
+
+
+boundarySource = Expression("t", t=0, degree=1)
+bcLeft = DirichletBC(V, boundarySource, boundaryLeft)
+bcRight = DirichletBC(V, 0.0, boundaryRight)
 
 # Define the time domain.
-T = [0,1]
+T = [0, 1]
 
 # Create the ESDIRK object.
-obj = ESDIRK(T,W,rhs,bcs=[bcLeft,bcRight],tdfBC=[boundarySource],tdf=[domainSource])
+obj = ESDIRK(T, W, rhs, bcs=[bcLeft, bcRight], tdfBC=[boundarySource], tdf=[domainSource])
 
 # Turn on extra terminal output
 obj.parameters["verbose"] = True

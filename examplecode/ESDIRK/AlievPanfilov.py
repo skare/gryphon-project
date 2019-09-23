@@ -14,7 +14,7 @@ Demo was tested on Ubuntu 14.04 with Fenics library 1.5
 # Copyright (C) 2015 Vladimir Zverev (vladimir.zverev@urfu.ru, Ural Federal University)
 
 # This file is part of Gryphon project
-# Copyright (C) 2012-2014 - Knut Erik Skare
+# Copyright (C) 2012-2019 - Knut Erik Skare
 #
 # Gryphon is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -30,15 +30,10 @@ Demo was tested on Ubuntu 14.04 with Fenics library 1.5
 # along with Gryphon. If not, see <http://www.gnu.org/licenses/>.
 
 
-from gryphon import ESDIRK
-from dolfin import *
-from mshr import *
-
-import numpy as np
-import os
-import subprocess
-import math
 from datetime import datetime
+
+from dolfin import *
+from gryphon import ESDIRK
 
 
 def set_output_dir():
