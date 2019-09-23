@@ -1,7 +1,7 @@
 ====================================================
 Gryphon, a module for time integration within FEniCS
 ====================================================
-Currently supports FEniCS 1.4.0 and 1.5.0
+Currently supports FEniCS 2019.1.0 on Python 3.6.8
 
 |
 Gryphon is intended to serve as a tool for solving systems of time dependent partial differential equations in FEniCS.
@@ -20,7 +20,7 @@ own problems. The examples included are:
 - The Aliev-Panfilov model (thanks to Vladimir Zverev)
 
 |
-Gryphon came about as a result of my masters thesis. It is available in the download section (link to the left).
+Gryphon came about as a result of my masters thesis. It is available by following this link: http://bit.ly/gryphon-thesis
 
 |
 Each branch contains roughly the following folders:
@@ -48,6 +48,10 @@ Gryphon requires that FEniCS is installed. Currently only Linux is supported (Ub
 
 Announcements
 =============
+
+2019-09-23: Gryphon moved to Github / Gryphon tested on FEniCS 2019.1.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+From here on, Gryphon will be hosted on Github. I've also attempted to make the code run on FEniCS 2019.1.0 / Python 3.6.8.
 
 2014-07-26: Gryphon moved to Bitbucket / Gryphon tested on FEniCS 1.4.0 / Small updates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
