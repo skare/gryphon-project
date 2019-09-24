@@ -18,6 +18,5 @@
 from src.ESDIRK import ESDIRK
 from src.backwardEuler import backwardEuler
 
-__version__ = "1.4.0"
 __help__ = "To get help on the available parameters of a Gryphon object, run the command 'info(Gryphon_object.parameters, verbose=True)'."
-__compatible_FEniCS_version__ = ["1.4.0", "1.5.0"]
+

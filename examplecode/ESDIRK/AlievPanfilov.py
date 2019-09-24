@@ -54,7 +54,7 @@ class InitialConditions(UserExpression):
 
 if __name__ == "__main__":
     output_dir = str(set_output_dir())
-    
+
     mesh = BoxMesh(Point(0, 1, 0), Point(1, 0, 4), 2, 2, 8)
 
     P1 = FiniteElement("Lagrange", mesh.ufl_cell(), 1)
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     mu_2 = Constant(0.3)
 
     # Define the time domain
-    T = [0, 1]
+    T = [0, 10]
 
     # Create mesh functions for coefficients of a diffusion tensor
     d00 = MeshFunction("double", mesh, 3)
@@ -99,34 +99,51 @@ if __name__ == "__main__":
 
     # Code for C++ evaluation of conductivity
     DiffusionTensor_code = '''
-    class DiffusionTensor : public Expression
+    
+    #include <pybind11/pybind11.h>
+    #include <pybind11/eigen.h>
+    namespace py = pybind11;
+    
+    #include <dolfin/function/Expression.h>
+    #include <dolfin/mesh/MeshFunction.h>
+    #include <dolfin/common/Array.h>
+    
+    class DiffusionTensor : public dolfin::Expression
     {
     public:
     
       // Create expression with 3 components
-      DiffusionTensor() : Expression(3) {}
+      DiffusionTensor() : dolfin::Expression(3) {}
     
       // Function for evaluating expression on each cell
-      void eval(Array<double>& values, const Array<double>& x, const ufc::cell& cell) const
+      void eval(Eigen::Ref<Eigen::VectorXd> values, Eigen::Ref<const Eigen::VectorXd> x, const ufc::cell& cell) const override
       {
-        const uint D = cell.topological_dimension;
-        const uint cell_index = cell.index;
+        const int cell_index = cell.index;
         values[0] = (*d00)[cell_index];
         values[1] = (*d11)[cell_index];
         values[2] = (*d22)[cell_index];
       }
     
       // The data stored in mesh functions
-      std::shared_ptr<MeshFunction<double> > d00;
-      std::shared_ptr<MeshFunction<double> > d11;
-      std::shared_ptr<MeshFunction<double> > d22;
+      std::shared_ptr<dolfin::MeshFunction<double> > d00;
+      std::shared_ptr<dolfin::MeshFunction<double> > d11;
+      std::shared_ptr<dolfin::MeshFunction<double> > d22;
     
-    };'''
+    };
+    
+    PYBIND11_MODULE(SIGNATURE, m)
+    {
+      py::class_<DiffusionTensor, std::shared_ptr<DiffusionTensor>, dolfin::Expression>
+        (m, "DiffusionTensor")
+        .def(py::init<>())
+        .def_readwrite("d00", &DiffusionTensor::d00)
+        .def_readwrite("d11", &DiffusionTensor::d11)
+        .def_readwrite("d22", &DiffusionTensor::d22);
+    }
+    '''
 
-    d_temp = Expression(cppcode=DiffusionTensor_code)
-    d_temp.d00 = d00
-    d_temp.d11 = d11
-    d_temp.d22 = d22
+    d_temp = CompiledExpression(compile_cpp_code(DiffusionTensor_code).DiffusionTensor(),
+                           d00=d00, d11=d11, d22=d22, degree=0)
     D = as_matrix(((d_temp[0], 0, 0), (0, d_temp[1], 0), (0, 0, d_temp[2])))
 
     # Define the right hand side for each of the PDEs

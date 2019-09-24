@@ -15,46 +15,46 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Gryphon. If not, see <http://www.gnu.org/licenses/>.
 
-from dolfin import UnitSquareMesh, FunctionSpace, TrialFunction, TestFunction, Constant, Expression, inner, grad, dx, \
-  Function, DOLFIN_EPS, DirichletBC
-from gryphon import ESDIRK
+import dolfin
+import gryphon
 
 # Define spatial mesh, function space, trial/test functions
-mesh = UnitSquareMesh(29, 29)
-V = FunctionSpace(mesh, "Lagrange", 1)
-u = TrialFunction(V)
-v = TestFunction(V)
+mesh = dolfin.UnitSquareMesh(29, 29)
+V = dolfin.FunctionSpace(mesh, "Lagrange", 1)
+u = dolfin.TrialFunction(V)
+v = dolfin.TestFunction(V)
 
 # Define diffusion coefficient and source inside domain
-D = Constant(0.1)
-domainSource = Expression("10*sin(pi/2*t)*exp(-((x[0]-0.7)*(x[0]-0.7) + (x[1]-0.5)*(x[1]-0.5))/0.01)", t=0, degree=1)
+D = dolfin.Constant(0.1)
+domainSource = dolfin.Expression("10*sin(pi/2*t)*exp(-((x[0]-0.7)*(x[0]-0.7) + (x[1]-0.5)*(x[1]-0.5))/0.01)",
+                                 t=0, degree=1)
 
 # Define right hand side of the problem
-rhs = -D * inner(grad(u), grad(v)) * dx + domainSource * v * dx
+rhs = -D * dolfin.inner(dolfin.grad(u), dolfin.grad(v)) * dolfin.dx + domainSource * v * dolfin.dx
 
 # Definie initial condition
-W = Function(V)
-W.interpolate(Constant(0.0))
+W = dolfin.Function(V)
+W.interpolate(dolfin.Constant(0.0))
 
 
 # Define left and right boundary
 def boundaryLeft(x, on_boundary):
-    return x[0] < DOLFIN_EPS
+    return x[0] < dolfin.DOLFIN_EPS
 
 
 def boundaryRight(x, on_boundary):
-    return 1.0 - x[0] < DOLFIN_EPS
+    return 1.0 - x[0] < dolfin.DOLFIN_EPS
 
 
-boundarySource = Expression("t", t=0, degree=1)
-bcLeft = DirichletBC(V, boundarySource, boundaryLeft)
-bcRight = DirichletBC(V, 0.0, boundaryRight)
+boundarySource = dolfin.Expression("t", t=0, degree=1)
+bcLeft = dolfin.DirichletBC(V, boundarySource, boundaryLeft)
+bcRight = dolfin.DirichletBC(V, 0.0, boundaryRight)
 
 # Define the time domain.
 T = [0, 1]
 
 # Create the ESDIRK object.
-obj = ESDIRK(T, W, rhs, bcs=[bcLeft, bcRight], tdfBC=[boundarySource], tdf=[domainSource])
+obj = gryphon.ESDIRK(T, W, rhs, bcs=[bcLeft, bcRight], tdfBC=[boundarySource], tdf=[domainSource])
 
 # Turn on extra terminal output
 obj.parameters["verbose"] = True
